@@ -465,6 +465,13 @@ input.txt{background:rgba(0,0,0,.25); border:1px solid var(--line); color:var(--
 </style>
 </head>
 <body>
+  <script>
+(function(){
+  var suits=['C','S','H','D'], ranks=['6','7','8','9','T','J','Q','K','A'];
+  ranks.forEach(function(r){ suits.forEach(function(s){ var img=new Image(); img.src='cards/'+r+s+'.webp'; }); });
+  var back=new Image(); back.src='cards/back.webp';
+})();
+</script>
 <div class="wrap" id="app"></div>
 <div class="toast" id="toast" hidden></div>
 <div class="notes" id="notes" aria-live="polite"></div>
