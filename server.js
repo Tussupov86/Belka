@@ -11,7 +11,9 @@ const { S_ } = E;
 
 const PORT = +process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
-const PUBLIC = path.join(__dirname, 'public');
+const PUBLIC = fs.existsSync(path.join(__dirname, 'public')) 
+  ? path.join(__dirname, 'public') 
+  : __dirname;
 const ADMIN_LOGIN = (process.env.ADMIN_LOGIN || 'belka').trim();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
