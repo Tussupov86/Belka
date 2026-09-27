@@ -1,0 +1,1350 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f3b36">
+<title>Белка онлайн</title>
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Rubik:wght@400;500;700&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --felt:#0f3b36; --felt-2:#0a2926; --felt-3:#15514a;
+  --ink:#ece6d6; --muted:#9fb8b0; --line:rgba(236,230,214,.14);
+  --brass:#d9a84e; --brass-ink:#1e1709;
+  --card:#f7f2e6; --card-ink:#1c1d22; --card-red:#b3302a; --card-edge:#d9d0bb;
+  --team-a:#86c9dc; --team-b:#eb9570;
+  --danger:#ef7b6b;
+  --display:"Unbounded", "Rubik", system-ui, sans-serif;
+  --body:"Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --cwg: clamp(52px, 13vw, 86px); --cw: var(--cwg);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:var(--body); color:var(--ink); font-size:15px;
+  background: radial-gradient(120% 90% at 50% 40%, var(--felt-3) 0%, var(--felt) 45%, var(--felt-2) 100%) fixed, var(--felt);
+  padding-inline:16px;
+}
+button{font:inherit; cursor:pointer}
+button:focus-visible, input:focus-visible{outline:2px solid var(--brass); outline-offset:2px}
+.wrap{max-width:980px; margin:0 auto; padding-block:14px 28px; display:flex; flex-direction:column; gap:14px}
+.top{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.logo{font-family:var(--display); font-weight:700; font-size:22px; letter-spacing:.02em; display:flex; align-items:center; gap:8px}
+.logo .j{display:inline-grid; place-items:center; width:28px; height:38px; border-radius:5px; background:var(--card); color:var(--card-ink); font-size:13px; box-shadow:0 2px 0 var(--card-edge)}
+.top .sp{flex:1}
+.sub{color:var(--muted); font-size:13px}
+.btn{border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--ink); padding:9px 14px; border-radius:10px; font-weight:500}
+.btn:hover{background:rgba(255,255,255,.1)}
+.btn.pri{background:var(--brass); color:var(--brass-ink); border-color:transparent; font-weight:700}
+.btn.pri:hover{filter:brightness(1.06)}
+.btn.sm{padding:5px 10px; font-size:13px; border-radius:8px}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+input.txt{background:rgba(0,0,0,.25); border:1px solid var(--line); color:var(--ink); padding:9px 12px; border-radius:10px; font:inherit; min-width:0; width:100%}
+.note{font-size:13px; color:var(--muted); line-height:1.5}
+.warn{border:1px solid rgba(239,123,107,.4); background:rgba(239,123,107,.08); padding:10px 12px; border-radius:10px; font-size:13px; line-height:1.5}
+
+/* lobby */
+.lobby{display:grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap:16px}
+@media (max-width:720px){.lobby{grid-template-columns:1fr}}
+.panel{background:rgba(0,0,0,.2); border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:12px}
+.panel h2{font-family:var(--display); font-size:15px; font-weight:500; margin:0; letter-spacing:.02em}
+.tlist{display:flex; flex-direction:column; gap:8px}
+.trow{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.03)}
+.trow .nm{font-weight:500}
+.trow .meta{font-size:12px; color:var(--muted)}
+.trow .grow{flex:1; min-width:0}
+.dots{display:flex; gap:4px}
+.dots i{width:9px; height:9px; border-radius:50%; border:1px solid var(--muted)}
+.dots i.on{background:var(--brass); border-color:var(--brass)}
+.dots i.bot{background:var(--muted); border-color:var(--muted)}
+.rules{font-size:13px; line-height:1.6; color:var(--ink)}
+.rules b{color:var(--brass); font-weight:500}
+.rules ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px}
+.row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+
+/* score bar */
+.score{display:grid; grid-template-columns: 1fr auto 1fr; gap:12px; align-items:center; background:rgba(0,0,0,.22); border:1px solid var(--line); border-radius:14px; padding:10px 14px}
+.team{display:flex; flex-direction:column; gap:6px; min-width:0}
+.team.r{align-items:flex-end; text-align:right}
+.team .tn{font-size:12px; letter-spacing:.08em; text-transform:uppercase; font-weight:500}
+.team.a .tn{color:var(--team-a)} .team.b .tn{color:var(--team-b)}
+.eyes{display:flex; gap:3px; flex-wrap:wrap}
+.team.r .eyes{justify-content:flex-end}
+.eyes i{width:11px; height:11px; border-radius:50%; border:1.5px solid rgba(236,230,214,.28)}
+.team.a .eyes i.on{background:var(--team-a); border-color:var(--team-a)}
+.team.b .eyes i.on{background:var(--team-b); border-color:var(--team-b)}
+.team .pts{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.team .pts b{color:var(--ink); font-weight:500}
+.trumpbox{display:flex; flex-direction:column; align-items:center; gap:2px; padding:0 6px}
+.trumpbox .lbl{font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.trumpbox .sym{width:44px; height:44px; border-radius:50%; background:var(--card); display:grid; place-items:center; font-size:26px; line-height:1; box-shadow:0 0 0 3px var(--brass)}
+.trumpbox .sym.red{color:var(--card-red)} .trumpbox .sym.blk{color:var(--card-ink)}
+.trumpbox .x{font-size:11px; color:var(--brass); font-weight:700}
+
+/* board */
+.board{display:grid; grid-template-columns: minmax(0,1fr) minmax(0,2.2fr) minmax(0,1fr); grid-template-areas:". top ." "left mid right"; gap:8px; align-items:center}
+.seat{display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; min-width:0; padding:8px 4px; border-radius:12px; border:1px solid transparent; transition:border-color .2s, background .2s}
+.seat.turn{border-color:var(--brass); background:rgba(217,168,78,.08)}
+.seat .av{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:15px; color:var(--felt-2)}
+.seat.a .av{background:var(--team-a); box-shadow:0 0 0 2px var(--team-a)} .seat.b .av{background:var(--team-b); box-shadow:0 0 0 2px var(--team-b)}
+.seat.empty .av{background:transparent; border:1.5px dashed var(--muted); color:var(--muted)}
+.seat .sn{font-weight:500; font-size:14px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.seat .si{font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:center}
+.chip{display:inline-flex; align-items:center; gap:3px; font-size:11px; padding:1px 7px; border-radius:99px; background:rgba(255,255,255,.08); color:var(--ink)}
+.chip.own{background:var(--brass); color:var(--brass-ink); font-weight:700}
+.chip .s.red{color:#ff9a8f}
+.backs{display:flex; padding-top:2px}
+.backs i{width:34px; height:48px; border-radius:3px; margin-left:-23px; background:#fff url(cards/back.webp) center/cover; box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.backs i:first-child{margin-left:0}
+.top-s{grid-area:top} .left-s{grid-area:left} .right-s{grid-area:right}
+.mid{grid-area:mid; position:relative; height:calc(var(--cw) * 1.4 * 2.35); min-height:180px; border-radius:50%; background:radial-gradient(closest-side, rgba(255,255,255,.05), transparent)}
+.mid .tc{position:absolute; left:50%; top:50%; transition:transform .25s ease}
+.mid .tc.p0{transform:translate(-50%, -10%)}
+.mid .tc.p1{transform:translate(-125%, -55%) rotate(-6deg)}
+.mid .tc.p2{transform:translate(-50%, -95%)}
+.mid .tc.p3{transform:translate(25%, -55%) rotate(6deg)}
+.mid .tc.win{filter:drop-shadow(0 0 6px var(--brass))}
+.center-msg{position:absolute; inset:0; display:grid; place-items:center; text-align:center; padding:8px}
+.overlay{background:rgba(10,30,27,.92); border:1px solid var(--brass); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; align-items:center; max-width:340px; z-index:5; position:relative}
+.overlay h3{font-family:var(--display); font-weight:700; font-size:18px; margin:0; color:var(--brass)}
+.overlay p{margin:0; font-size:14px; line-height:1.5}
+
+/* cards */
+.card{--cw:var(--cwg); width:var(--cw); aspect-ratio:5/7; border-radius:calc(var(--cw)*.06); position:relative; user-select:none; flex:none; overflow:hidden; background:#fff; box-shadow:0 0 0 1px rgba(0,0,0,.18), 0 5px 12px rgba(0,0,0,.32)}
+.card img{display:block; width:100%; height:100%; pointer-events:none}
+.card .hide{position:absolute; width:27%; height:23%; transform:translate(-50%,-50%); background:#fff; border-radius:3px}
+.card.tr::after{content:""; position:absolute; left:30%; right:30%; bottom:0; height:4px; border-radius:3px 3px 0 0; background:var(--brass)}
+.card.xs{--cw:40px; box-shadow:0 1px 0 var(--card-edge), 0 2px 5px rgba(0,0,0,.3)}
+.eyes-box{position:relative; width:112px; height:98px; flex:none}
+.team.r .eyes-box{align-self:flex-end}
+.six{position:absolute; left:4px; top:4px; width:40px; height:56px}
+.six .card{position:absolute; left:0; top:0}
+.six .card.cover{transform-origin:0 0; transition:transform .6s cubic-bezier(.3,.7,.3,1); box-shadow:0 0 0 1px rgba(0,0,0,.25), 2px 4px 8px rgba(0,0,0,.45)}
+.eyes-n{position:absolute; right:0; bottom:0; display:flex; flex-direction:column; align-items:flex-end; line-height:1.1}
+.eyes-n em{font-style:normal; font-size:10px; color:var(--brass)}
+.eyes-n{font-family:var(--display); font-size:13px; font-variant-numeric:tabular-nums}
+.eyes-n small{color:var(--muted); font-family:var(--body); font-size:11px}
+.hand-wrap{display:flex; flex-direction:column; gap:8px; align-items:center}
+.me-line{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center}
+.hand{display:flex; justify-content:center; padding:14px 8px 4px; min-height:calc(var(--cw)*1.4 + 20px); max-width:100%}
+.hand .card{margin-left:calc(var(--cw) * -0.3); transition:transform .15s ease, opacity .15s}
+.hand .card:first-child{margin-left:0}
+.hand .card.ok{cursor:pointer; transform:translateY(-10px)}
+.hand .card.ok:hover{transform:translateY(-18px)}
+.hand .card.no{filter:brightness(.72) saturate(.7)}
+.hand.idle .card{transform:none; opacity:1}
+.status{font-size:14px; min-height:20px; text-align:center}
+.status b{color:var(--brass); font-weight:500}
+.side{display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center}
+.last{display:flex; gap:6px; align-items:center; font-size:12px; color:var(--muted)}
+.mini{display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:24px; padding:0 4px; border-radius:4px; background:var(--card); color:var(--card-ink); font-size:12px; font-weight:700}
+.mini.red{color:var(--card-red)}
+.mini.win{box-shadow:0 0 0 2px var(--brass)}
+.toast{position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--card); color:var(--card-ink); padding:9px 14px; border-radius:10px; font-size:14px; box-shadow:0 6px 20px rgba(0,0,0,.4); z-index:50; max-width:calc(100% - 32px)}
+@media (max-width:520px){
+  .backs i{width:26px; height:37px; margin-left:-19px}
+  .hand .card{margin-left:calc(var(--cw) * -0.5)}
+  .seat .av{width:32px; height:32px; font-size:13px}
+  .seat .sn{font-size:13px}
+  .score{padding:8px 10px}
+  .trumpbox .sym{width:38px; height:38px; font-size:22px}
+  .eyes i{width:9px; height:9px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* аккаунты */
+.av{width:38px; height:38px; border-radius:50%; display:inline-grid; place-items:center; font-family:var(--display); font-weight:700; font-size:15px; color:var(--felt-2); background:var(--muted); overflow:hidden; flex:none}
+.av img{width:100%; height:100%; object-fit:cover; display:block}
+.av.sm{width:26px; height:26px; font-size:11px}
+.av.xs{width:22px; height:22px; font-size:10px; margin-left:-6px; box-shadow:0 0 0 2px var(--felt-2)}
+.av.xs:first-child{margin-left:0}
+.av.xs.empty{background:transparent; border:1.5px dashed var(--muted)}
+.av.xs.bot{background:#6d8a83}
+.av.lg{width:72px; height:72px; font-size:28px}
+.avs{display:flex}
+.col{display:flex; flex-direction:column; gap:16px; min-width:0}
+.tabs{display:flex; gap:4px; background:rgba(0,0,0,.25); padding:4px; border-radius:10px}
+.tab{flex:1; border:0; background:transparent; color:var(--muted); padding:8px; border-radius:7px; font-weight:500}
+.tab.on{background:var(--brass); color:var(--brass-ink)}
+.form{display:flex; flex-direction:column; gap:8px}
+.form label{font-size:13px; color:var(--muted); margin-top:4px}
+.form .btn.pri{margin-top:8px}
+.avpick{display:flex; align-items:center; gap:12px; font-size:13px}
+.avpick input{min-width:0; color:var(--muted)}
+.prow{display:flex; gap:14px; align-items:center}
+.avwrap{position:relative; cursor:pointer; flex:none}
+.avwrap .avedit{position:absolute; left:50%; bottom:-6px; transform:translateX(-50%); font-size:10px; background:var(--brass); color:var(--brass-ink); padding:1px 6px; border-radius:99px; white-space:nowrap}
+.pname{font-family:var(--display); font-size:18px; font-weight:700; overflow:hidden; text-overflow:ellipsis}
+.plv{color:var(--brass); font-weight:500; margin:2px 0 6px}
+.bar{height:8px; border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden; margin-bottom:4px}
+.bar i{display:block; height:100%; background:linear-gradient(90deg, var(--brass), #f0cf86); border-radius:99px}
+.stats{display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--muted)}
+.stats b{color:var(--ink); font-weight:500; font-variant-numeric:tabular-nums}
+.leaders{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+.leaders li{display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:8px}
+.leaders li.me{background:rgba(217,168,78,.12)}
+.leaders .pos{width:18px; text-align:right; color:var(--muted); font-variant-numeric:tabular-nums}
+.leaders .ln{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.leaders .lv, .uchip .lv{font-size:11px; color:var(--brass)}
+.leaders .pp{font-variant-numeric:tabular-nums; font-weight:500}
+.uchip{display:inline-flex; align-items:center; gap:6px; font-size:13px}
+.tbar{width:80px; height:5px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden}
+.tbar i{display:block; height:100%; background:var(--brass); transition:width .25s linear}
+.tbar i.low{background:var(--danger)}
+.btn.danger{border-color:var(--danger); color:var(--danger)}
+@media (max-width:520px){ .uchip span:not(.av){display:none} }
+
+/* ---- лобби в стиле игрового клиента ---- */
+.view-lobby{max-width:1180px}
+.lb{display:grid; grid-template-columns:auto minmax(0,1fr) 300px; grid-template-areas:"prof list side"; gap:16px; align-items:start}
+.lb-prof{grid-area:prof; width:84px; min-height:64px; border:2px solid rgba(236,230,214,.75); border-radius:8px; background:rgba(0,0,0,.18); color:var(--ink); display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 6px}
+.lb-prof:hover{background:rgba(255,255,255,.06)}
+.lp-t{display:flex; flex-direction:column; align-items:center; line-height:1.1; max-width:100%}
+.lp-t b{font-size:12px; font-weight:500; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.lp-t small{font-size:10px; color:var(--brass)}
+.lp-bar{width:60px; height:4px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden}
+.lp-bar i{display:block; height:100%; background:var(--brass)}
+.lb-list{grid-area:list; background:linear-gradient(180deg, #1e2a2a, #252d25 70%, #2b3226); border:1px solid #0d1414; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,.35); min-height:60vh; display:flex; flex-direction:column; overflow:hidden}
+.lb-head{position:relative; display:flex; align-items:center; justify-content:center; background:#141c1c; padding:10px 56px; font-family:var(--display); font-weight:500; font-size:17px; min-height:48px}
+.sq{position:absolute; right:10px; top:50%; transform:translateY(-50%); width:44px; height:34px; border-radius:6px; border:1.5px solid rgba(236,230,214,.8); background:transparent; color:var(--ink); display:grid; place-items:center}
+.sq svg{width:20px; height:20px}
+.sq:hover{background:rgba(255,255,255,.08)}
+.rooms{display:flex; flex-direction:column; gap:14px; padding:16px 10px 10px; overflow:auto}
+.room{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; background:#161f1f; border-radius:6px; padding:6px 8px; cursor:pointer; border:1px solid transparent}
+.room:hover, .room:focus-visible{border-color:rgba(217,168,78,.6); outline:none}
+.room.live{box-shadow:inset 3px 0 0 var(--brass)}
+.slots{display:grid; grid-template-columns:1fr 1fr; gap:5px}
+.slot{height:32px; border-radius:8px; background:#303535; display:flex; align-items:center; gap:7px; padding:0 8px; min-width:0; font-size:14px}
+.slot.empty{background:#2a2f2f}
+.slot.me{background:#3b4533}
+.slot .av.xs{margin-left:0; box-shadow:none}
+.slot .sl{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.slot .slv{font-size:11px; color:var(--brass); font-variant-numeric:tabular-nums}
+.ricons{display:grid; grid-template-columns:repeat(3, 38px); gap:2px 4px; justify-items:center}
+.ic{display:flex; flex-direction:column; align-items:center; color:#f4f1e8; font-size:0; background:none; border:0; padding:0}
+.ic svg{width:24px; height:24px; fill:currentColor}
+.ic small{font-size:10px; line-height:1; margin-top:1px; letter-spacing:.02em; white-space:nowrap}
+.ic.del{color:var(--danger); cursor:pointer}
+.empty-note{text-align:center; padding:30px 10px}
+.lb-side{grid-area:side; display:flex; flex-direction:column; gap:14px}
+.lb-btns{background:#1b2323; border:1px solid #0d1414; border-radius:8px; padding:16px 24px; display:flex; flex-direction:column; gap:14px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.btn.big{padding:12px 14px; font-size:18px; border:1.5px solid rgba(236,230,214,.85); background:transparent; border-radius:8px}
+.btn.green{background:linear-gradient(180deg,#8fd12a,#6db514); color:#fff; border-color:transparent; font-weight:500; text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.btn.green:hover{filter:brightness(1.05)}
+.lb-stat{display:flex; align-items:center; gap:10px; background:#1b2323; border:1px solid #0d1414; border-radius:8px; padding:0 16px 0 0; font-weight:500; overflow:hidden}
+.lb-stat svg{width:52px; height:48px; padding:10px; fill:#5c9a6c; background:#141b1b; border-right:1px solid #0d1414}
+.lb-stat b{margin-left:auto; font-variant-numeric:tabular-nums}
+.lb-links{display:flex; gap:8px}
+.lb-links .btn{flex:1}
+.modal{position:fixed; inset:0; background:rgba(4,12,11,.6); display:grid; place-items:center; padding:16px; z-index:40}
+.mbox{width:min(520px, 100%); max-height:calc(100% - 20px); overflow:auto; position:relative; background:#172020}
+.mclose{position:absolute; right:10px; top:8px; background:none; border:0; color:var(--ink); font-size:26px; line-height:1}
+.txt.code{font-size:24px; letter-spacing:.3em; text-align:center; font-variant-numeric:tabular-nums}
+.btn svg{width:14px; height:14px; fill:currentColor; vertical-align:-2px}
+@media (max-width:820px){
+  .lb{grid-template-columns:auto minmax(0,1fr); grid-template-areas:"prof side" "list list"}
+  .lb-btns{padding:12px; gap:10px}
+  .btn.big{font-size:16px; padding:9px}
+  .lb-list{min-height:40vh}
+}
+@media (max-width:520px){
+  .ricons{grid-template-columns:repeat(2, 34px)}
+  .slot{font-size:12px; padding:0 5px; gap:4px; height:30px}
+}
+
+/* ---- телефон горизонтально: всё на одном экране ---- */
+@media (orientation:landscape) and (max-height:800px) and (min-aspect-ratio:4/3){
+  body{padding-inline:max(10px, env(safe-area-inset-left, 0px)) max(10px, env(safe-area-inset-right, 0px))}
+  :root{--cwg: clamp(38px, 12vh, 80px)}
+  .wrap.view-table{max-width:none; height:100%; padding-block:6px; display:grid; gap:6px 10px;
+    grid-template-columns:minmax(150px, 190px) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"top board" "score board" "side hand"}
+  .view-table > .top{grid-area:top; flex-direction:column; align-items:flex-start; gap:4px}
+  .view-table > .top .logo{font-size:15px} .view-table > .top .logo .j{width:20px; height:27px; font-size:10px}
+  .view-table > .top .sp, .view-table > .top .uchip{display:none}
+  .view-table > .top .sub{font-size:11px}
+  .view-table > .score{grid-area:score; grid-template-columns:1fr 1fr; gap:4px 6px; padding:6px 8px; align-content:start; overflow:hidden}
+  .view-table > .score .trumpbox{grid-column:1 / -1}
+  .view-table > .score .team, .view-table > .score .team.r{align-items:flex-start; text-align:left; gap:2px}
+  .view-table > .score .eyes-box{zoom:.55}
+  .view-table > .score .tn{font-size:10px}
+  .view-table > .score .trumpbox{flex-direction:row; gap:8px; justify-content:flex-start; order:-1}
+  .view-table > .score .team.r{order:1}
+  .view-table > .score .trumpbox .sym{width:30px; height:30px; font-size:18px; box-shadow:0 0 0 2px var(--brass)}
+  .view-table > .score .pts{font-size:11px}
+  .view-table > .board{grid-area:board; min-height:0; align-content:center; gap:2px}
+  .view-table .mid{height:calc(var(--cw) * 1.4 * 2.05); min-height:0}
+  .view-table .seat{padding:3px 2px; gap:2px}
+  .view-table .seat .av{width:28px; height:28px; font-size:12px}
+  .view-table .seat .sn{font-size:12px}
+  .view-table .seat .si{gap:3px}
+  .view-table .seat .chip{font-size:10px; padding:0 5px}
+  .view-table .backs i{width:18px; height:26px; margin-left:-13px}
+  .view-table .seat .btn.sm{padding:3px 7px; font-size:11px}
+  .view-table > .hand-wrap{grid-area:hand; gap:2px}
+  .view-table > .hand-wrap .me-line{display:none}
+  .view-table .hand{padding:8px 4px 0; min-height:calc(var(--cw)*1.4 + 8px)}
+  .view-table .hand .card{margin-left:calc(var(--cw) * -0.28)}
+  .view-table .hand .card.ok{transform:translateY(-7px)}
+  .view-table .status{font-size:12px; min-height:16px}
+  .view-table > .side{grid-area:side; flex-direction:column; align-items:flex-start; gap:6px}
+  .view-table > .side .last{flex-wrap:wrap; font-size:11px}
+  .view-table > .side .mini{min-width:24px; height:20px; font-size:11px}
+  .view-table .overlay{padding:8px 10px; gap:4px; max-width:260px}
+  .view-table .overlay h3{font-size:14px}
+  .view-table .overlay p{font-size:12px}
+  .view-lobby .lb{grid-template-columns:auto minmax(0,1fr) 230px; grid-template-areas:"prof list side"}
+  .view-lobby .lb-list{min-height:0; max-height:calc(100vh - 30px)}
+  .view-lobby .btn.big{font-size:15px; padding:8px}
+  .view-lobby .lb-btns{padding:10px 14px; gap:8px}
+}
+
+[hidden]{display:none!important}
+.seat.off{opacity:.6}
+.miss{color:var(--danger); font-size:12px}
+.codeb{font-family:var(--display); letter-spacing:.15em; color:var(--brass); font-size:16px}
+.adm{display:flex; flex-direction:column; gap:6px; max-height:46vh; overflow:auto; margin-bottom:8px}
+.arow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:6px 8px; background:rgba(0,0,0,.2); border-radius:8px}
+.arow .ln{flex:1; min-width:90px; overflow:hidden; text-overflow:ellipsis}
+.arow .lv{font-size:11px; color:var(--brass)}
+.pts-in{width:84px; padding:5px 8px}
+.newpw{display:flex; gap:6px; flex-basis:100%}
+.newpw .txt{padding:5px 8px}
+.panel h2 + .rules{margin-bottom:6px}
+.btn.pri.green{color:#fff}
+
+.rtable{display:flex; flex-direction:column; gap:3px; max-height:58vh; overflow:auto; margin-top:8px}
+.rrow{display:grid; grid-template-columns:34px minmax(0,1fr) 34px 52px 52px 48px 42px; gap:6px; align-items:center; padding:5px 8px; border-radius:8px; background:rgba(255,255,255,.03); font-variant-numeric:tabular-nums; font-size:14px}
+.rrow.rhead{background:transparent; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; position:sticky; top:0; background:#172020; z-index:1}
+.rrow.me{background:rgba(217,168,78,.16); box-shadow:inset 0 0 0 1px rgba(217,168,78,.5)}
+.rrow .rname{display:flex; align-items:center; gap:8px; min-width:0}
+.rrow .ln{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rrow .lv{color:var(--brass)}
+.rrow .pp{font-weight:500}
+.rpos{text-align:center; font-weight:500; color:var(--muted)}
+.rpos.gold, .rpos.silver, .rpos.bronze{width:24px; height:24px; border-radius:50%; display:grid; place-items:center; color:#1e1709; justify-self:center}
+.rpos.gold{background:#e6bd4f} .rpos.silver{background:#c9cfd2} .rpos.bronze{background:#cf8e57}
+.mypos{color:var(--brass); font-size:16px}
+@media (max-width:560px){ .rrow{grid-template-columns:30px minmax(0,1fr) 30px 48px} .rx{display:none} }
+
+.seat{position:relative}
+.bubble{position:absolute; left:50%; top:-14px; transform:translateX(-50%); font-size:30px; line-height:1; background:#fffdf7; border-radius:16px; padding:6px 8px; box-shadow:0 6px 16px rgba(0,0,0,.4); z-index:6; animation:bub 3.5s ease forwards; pointer-events:none}
+.bubble::after{content:""; position:absolute; left:50%; bottom:-6px; transform:translateX(-50%) rotate(45deg); width:12px; height:12px; background:#fffdf7}
+@keyframes bub{0%{opacity:0; transform:translate(-50%,8px) scale(.6)} 8%{opacity:1; transform:translate(-50%,0) scale(1.1)} 14%{transform:translate(-50%,0) scale(1)} 85%{opacity:1} 100%{opacity:0; transform:translate(-50%,-10px)}}
+.me-s .bubble{top:-40px}
+.emo-wrap{position:relative}
+.emo-btn{font-size:18px; padding:4px 10px; line-height:1.2}
+.emo-pal{position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); display:grid; grid-template-columns:repeat(7, 40px); gap:4px; padding:8px; background:#172020; border:1px solid var(--line); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.45); z-index:20}
+.emo{font-size:24px; width:40px; height:40px; border:0; border-radius:8px; background:transparent; line-height:1}
+.emo:hover, .emo:focus-visible{background:rgba(255,255,255,.1)}
+.chat{width:min(560px, 100%); display:flex; flex-direction:column; gap:6px; background:rgba(0,0,0,.22); border:1px solid var(--line); border-radius:12px; padding:8px}
+.chat-log{max-height:170px; min-height:60px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; padding:2px 4px}
+.msg{font-size:14px; line-height:1.35; overflow-wrap:anywhere}
+.msg b{font-weight:500; color:var(--team-a); margin-right:6px}
+.msg.mine b{color:var(--brass)}
+.chat-form{display:flex; gap:6px}
+.chat-form .txt{flex:1; padding:8px 10px}
+.chat-form .btn{padding:6px 14px}
+@media (orientation:landscape) and (max-height:800px) and (min-aspect-ratio:4/3){
+  .view-table .chat-log{max-height:22vh; min-height:40px}
+  .view-table .chat{padding:6px}
+  .view-table .bubble{font-size:22px; padding:4px 6px; top:-8px}
+  .emo-pal{left:0; transform:none; grid-template-columns:repeat(7, 34px)}
+  .emo{width:34px; height:34px; font-size:20px}
+}
+@media (max-width:420px){ .emo-pal{grid-template-columns:repeat(5, 40px)} }
+.lb-stat > span:not(.dot-ic){white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.lb-stat .dot-ic{width:52px; height:48px; display:grid; place-items:center; background:#141b1b; border-right:1px solid #0d1414; flex:none}
+.lb-stat .dot-ic i{width:14px; height:14px; border-radius:50%; background:#6fd13a; box-shadow:0 0 0 4px rgba(111,209,58,.18); animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(111,209,58,.06)}}
+@media (prefers-reduced-motion:reduce){.lb-stat .dot-ic i{animation:none}}
+.lobby-info{display:flex; flex-wrap:wrap; justify-content:center; gap:4px 14px; font-size:12px; color:var(--muted); border-top:1px solid var(--line); padding-top:8px; margin-top:2px; width:100%}
+.lobby-info b{color:var(--ink); font-weight:500; font-variant-numeric:tabular-nums}
+.lobby-info .dot{display:inline-block; width:8px; height:8px; border-radius:50%; background:#6fd13a; margin-right:5px; vertical-align:1px}
+.wait-hint{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; text-align:center; padding:8px; color:var(--muted); font-size:13px; line-height:1.4}
+.wait-hint b{font-family:var(--display); font-weight:700; color:var(--brass); font-size:16px}
+.waitbar{display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; width:min(560px,100%)}
+.waitbar .lobby-info{border-top:0; padding-top:0}
+.ready-btn{margin-top:4px; min-width:120px; font-weight:700}
+.ready-btn.is-ready{border-color:var(--brass); color:var(--brass)}
+.ready-note{font-size:11px}
+.view-table .me-line{width:100%; display:flex; justify-content:center}
+@media (orientation:landscape) and (max-height:800px) and (min-aspect-ratio:4/3){
+  .view-table > .hand-wrap.waiting .me-line{display:flex}
+  .view-table > .hand-wrap.waiting .seat .av{width:24px; height:24px}
+  .view-table > .hand-wrap.waiting .waitbar > .note, .view-table .ready-note{display:none}
+  .view-table > .hand-wrap.waiting .chat-log{max-height:11vh; min-height:26px}
+  .view-table > .hand-wrap.waiting{gap:2px}
+  .view-table .wait-hint{font-size:11px} .view-table .wait-hint b{font-size:13px}
+}
+.sq.spin svg{animation:spin .6s ease}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lb-head .upd{position:absolute; left:14px; font-family:var(--body); font-size:11px; color:var(--muted); font-weight:400}
+@media (max-width:560px){ .lb-head .upd{display:none} }
+.view-table > .top .sub{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.view-table > .top{row-gap:6px}
+.room .rno{position:absolute; left:10px; top:-8px; font-size:10px; background:#161f1f; color:var(--muted); padding:0 6px; border-radius:6px}
+.room{position:relative}
+.chip.ipc{background:#e0533f; color:#fff; font-weight:700; letter-spacing:.04em; cursor:help}
+.chip.ipc.g2{background:#9b59d0} .chip.ipc.g3{background:#d08a1e}
+.slot .chip.ipc{font-size:10px; padding:0 5px}
+.ipwarn{font-size:12px; color:#ffb4a8; background:rgba(224,83,63,.12); border:1px solid rgba(224,83,63,.4); border-radius:8px; padding:4px 10px}
+
+.bdg{display:inline-grid; place-items:center; min-width:20px; height:20px; padding:0 6px; border-radius:99px; background:#e0533f; color:#fff; font-size:12px; font-weight:700; vertical-align:2px; margin-left:4px}
+.btn.big .bdg{font-size:13px}
+.notes{position:fixed; left:50%; transform:translateX(-50%); top:calc(10px + env(safe-area-inset-top,0px)); z-index:70; display:flex; flex-direction:column; gap:8px; width:min(340px, calc(100% - 24px))}
+.note-card{display:flex; gap:10px; align-items:flex-start; background:#1c2626; border:1px solid var(--line); border-left:4px solid var(--brass); border-radius:12px; padding:10px 12px; box-shadow:0 10px 30px rgba(0,0,0,.45); animation:nin .25s ease}
+.note-card.invite{border-left-color:#8fd12a} .note-card.dm{border-left-color:var(--team-a)}
+.note-card .nb{flex:1; min-width:0; display:flex; flex-direction:column; gap:8px}
+.note-card .nt{font-size:14px; line-height:1.35; overflow-wrap:anywhere}
+.note-card .nx{background:none; border:0; color:var(--muted); font-size:20px; line-height:1; padding:0 2px}
+@keyframes nin{from{opacity:0; transform:translateY(-8px)}}
+.flist{display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:52vh; overflow:auto}
+.frow{display:flex; align-items:center; gap:8px; padding:7px 9px; border-radius:10px; background:rgba(255,255,255,.04); flex-wrap:wrap}
+.frow .fi{flex:1; min-width:120px; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px}
+.frow .lv{font-size:11px; color:var(--brass)}
+.where{display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--muted)}
+.where i{width:8px; height:8px; border-radius:50%; background:#5c6b68}
+.where.on i{background:#6fd13a}
+.sub3{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:10px 0 0; font-weight:500}
+.tabs .tab small{color:inherit; opacity:.7}
+.dmhead{display:flex; align-items:center; gap:10px; padding-right:28px}
+.dmhead > div{flex:1; display:flex; flex-direction:column}
+.dmlog{display:flex; flex-direction:column; gap:6px; height:min(46vh, 380px); overflow-y:auto; margin:10px 0; padding:4px}
+.dmsg{align-self:flex-start; max-width:80%; background:#263131; border-radius:12px 12px 12px 4px; padding:7px 10px; display:flex; flex-direction:column; gap:2px; overflow-wrap:anywhere}
+.dmsg.mine{align-self:flex-end; background:#3b4533; border-radius:12px 12px 4px 12px}
+.dmsg small{font-size:10px; color:var(--muted); align-self:flex-end}
+.chip.fr{background:rgba(111,209,58,.18); color:#a8e38a}
+@media (orientation:landscape) and (max-height:540px){ .notes{top:6px; width:min(320px, 60%)} .dmlog{height:36vh} }
+.pbtn{background:none; border:0; padding:2px 6px; color:inherit; display:flex; flex-direction:column; align-items:center; gap:5px; border-radius:10px; cursor:pointer; max-width:100%}
+.pbtn:hover .sn, .pbtn:focus-visible .sn{text-decoration:underline; text-underline-offset:3px}
+.pbtn .sn{max-width:100%}
+.pcard{display:flex; gap:16px; align-items:center; padding-right:24px}
+.pcard .where{margin-top:6px}
+.pstats{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; margin:14px 0}
+.pstats > div{background:rgba(255,255,255,.04); border-radius:10px; padding:8px 6px; text-align:center; display:flex; flex-direction:column; gap:2px}
+.pstats b{font-family:var(--display); font-size:20px; font-variant-numeric:tabular-nums}
+.pstats b.rk{color:var(--brass)}
+.pstats span{font-size:11px; color:var(--muted); line-height:1.2}
+@media (max-width:480px){ .pstats{grid-template-columns:repeat(3, minmax(0,1fr))} .pcard{gap:10px} }
+.avbox{position:relative; display:inline-block}
+.avbox .rdy{position:absolute; right:-4px; bottom:-2px; width:18px; height:18px; border-radius:50%; background:#6fd13a; color:#0b2e2a; font-style:normal; font-size:12px; font-weight:700; display:grid; place-items:center; box-shadow:0 0 0 2px var(--felt-2)}
+.top .topline{flex-basis:100%; order:10; display:flex}
+@media (orientation:landscape) and (max-height:800px) and (min-aspect-ratio:4/3){ .view-table > .top .topline{flex-basis:auto} }
+.ic.lock{color:var(--brass)}
+.room.priv .slots{opacity:.9}
+.logo-img{height:40px; width:auto; display:block; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.hero-logo{display:flex; flex-direction:column; align-items:center; gap:6px; padding-block:6px 4px}
+.hero-logo img{height:clamp(110px, 22vw, 160px); width:auto; filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+@media (max-width:520px){ .logo-img{height:32px} }
+@media (orientation:landscape) and (max-height:800px) and (min-aspect-ratio:4/3){ .view-table > .top .logo-img{height:26px} }
+
+/* сукно в казахском стиле: бледный орнамент «кошкар мүйіз», не мешает игре */
+#app.view-table::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.14;
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20transform%3D%22%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M8%20190%20V8%20H190%22/%3E%3Cpath%20d%3D%22M18%20150%20V18%20H150%22%20stroke-width%3D%221.3%22/%3E%20%3Cg%20transform%3D%22translate%2846%2046%29%20rotate%28-45%29%20scale%281.2%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3Cpath%20d%3D%22M0%200%20V22%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28100%2018%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%2818%20100%29%20rotate%28-90%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3C/g%3E%3C/g%3E%3C/svg%3E") left 8px top 8px / clamp(90px,14vmin,170px) no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20transform%3D%22translate%28200%200%29%20scale%28-1%201%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M8%20190%20V8%20H190%22/%3E%3Cpath%20d%3D%22M18%20150%20V18%20H150%22%20stroke-width%3D%221.3%22/%3E%20%3Cg%20transform%3D%22translate%2846%2046%29%20rotate%28-45%29%20scale%281.2%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3Cpath%20d%3D%22M0%200%20V22%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28100%2018%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%2818%20100%29%20rotate%28-90%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3C/g%3E%3C/g%3E%3C/svg%3E") right 8px top 8px / clamp(90px,14vmin,170px) no-repeat,
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20transform%3D%22translate%280%20200%29%20scale%281%20-1%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M8%20190%20V8%20H190%22/%3E%3Cpath%20d%3D%22M18%20150%20V18%20H150%22%20stroke-width%3D%221.3%22/%3E%20%3Cg%20transform%3D%22translate%2846%2046%29%20rotate%28-45%29%20scale%281.2%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3Cpath%20d%3D%22M0%200%20V22%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28100%2018%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%2818%20100%29%20rotate%28-90%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3C/g%3E%3C/g%3E%3C/svg%3E") left 8px bottom 8px / clamp(90px,14vmin,170px) no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20transform%3D%22translate%28200%20200%29%20scale%28-1%20-1%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M8%20190%20V8%20H190%22/%3E%3Cpath%20d%3D%22M18%20150%20V18%20H150%22%20stroke-width%3D%221.3%22/%3E%20%3Cg%20transform%3D%22translate%2846%2046%29%20rotate%28-45%29%20scale%281.2%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3Cpath%20d%3D%22M0%200%20V22%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%28100%2018%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3Cg%20transform%3D%22translate%2818%20100%29%20rotate%28-90%29%20scale%28.6%29%22%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%3C/g%3E%20%3C/g%3E%3C/g%3E%3C/svg%3E") right 8px bottom 8px / clamp(90px,14vmin,170px) no-repeat}
+.view-table .mid::before{content:""; position:absolute; left:50%; top:50%; width:min(120%, 66vmin); aspect-ratio:1; transform:translate(-50%,-50%); background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%22-200%20-200%20400%20400%22%3E%20%3Cg%20opacity%3D%221%22%3E%20%3Ccircle%20r%3D%22186%22%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%222%22/%3E%20%3Ccircle%20r%3D%22176%22%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%221%22%20stroke-dasharray%3D%222%207%22/%3E%20%3Ccircle%20r%3D%2260%22%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%222%22/%3E%20%3Cg%20transform%3D%22rotate%280%29%20translate%280%20-66%29%20scale%281.55%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%3Cg%20transform%3D%22rotate%2890%29%20translate%280%20-66%29%20scale%281.55%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%3Cg%20transform%3D%22rotate%28180%29%20translate%280%20-66%29%20scale%281.55%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%3Cg%20transform%3D%22rotate%28270%29%20translate%280%20-66%29%20scale%281.55%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%20%3Cg%20transform%3D%22rotate%2845%29%20translate%280%20-150%29%20scale%28.8%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%3Cg%20transform%3D%22rotate%28135%29%20translate%280%20-150%29%20scale%28.8%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%3Cg%20transform%3D%22rotate%28225%29%20translate%280%20-150%29%20scale%28.8%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%3Cg%20transform%3D%22rotate%28315%29%20translate%280%20-150%29%20scale%28.8%29%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22/%3E%3Cpath%20d%3D%22M0%200%20C0%20-18%2010%20-34%2028%20-36%20C44%20-38%2054%20-24%2048%20-12%20C43%20-2%2030%20-4%2030%20-13%20C30%20-20%2039%20-21%2040%20-15%22%20transform%3D%22scale%28-1%201%29%22/%3E%20%3Cpath%20d%3D%22M0%200%20V20%22/%3E%3Cpath%20d%3D%22M0%2020%20L6%2027%20L0%2034%20L-6%2027Z%22/%3E%20%3C/g%3E%3C/g%3E%20%3Cpath%20d%3D%22M0%20-26%20L26%200%20L0%2026%20L-26%200Z%22%20fill%3D%22none%22%20stroke%3D%22%23e3b75c%22%20stroke-width%3D%222%22/%3E%20%3C/g%3E%3C/svg%3E") center/contain no-repeat; opacity:.085; pointer-events:none; z-index:0}
+.view-table .mid > .tc, .view-table .mid > .center-msg, .view-table .mid > .wait-hint{z-index:1}
+.eggs{display:inline-block; width:38px; height:26px} .eggs svg{width:100%; height:100%; display:block}
+.chip.cmp{border:0; cursor:pointer; background:rgba(224,83,63,.16); color:#ffb4a8; font:inherit; font-size:11px}
+.chip.cmp:hover{background:rgba(224,83,63,.3)} .chip.cmp.armed{background:#e0533f; color:#fff}
+.chip.cmp.done{background:rgba(255,255,255,.06); color:var(--muted); cursor:default}
+.warn.ban{margin:10px 10px 0}
+.rank{display:inline-grid; place-items:center; line-height:1; flex:none}
+.rank.pro{font-family:var(--display); font-weight:700; font-size:10px; letter-spacing:.12em; padding:3px 7px 2px; border-radius:5px; color:#1e1709; background:linear-gradient(180deg,#f4d98c,#d9a84e); box-shadow:0 0 0 1px #9a6b12, 0 2px 4px rgba(0,0,0,.35)}
+.rank.crown svg{width:34px; height:22px; display:block; filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+.rank.xs.pro{font-size:8px; padding:2px 4px 1px; border-radius:4px}
+.rank.xs.crown svg{width:22px; height:15px}
+.pbtn .rank{margin:0 0 -4px; position:relative; z-index:1}
+.pcard .grow > .rank{margin-bottom:4px}
+.lp-t .rank{margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast" hidden></div>
+<div class="notes" id="notes" aria-live="polite"></div>
+<script>
+(() => {
+/* ================= константы ================= */
+const SUITS = ['C','S','H','D'];
+const SYM = {C:'♣', S:'♠', H:'♥', D:'♦'};
+const SUIT_NAME = {C:'трефы', S:'пики', H:'червы', D:'бубны'};
+const RED = {H:1, D:1};
+const RANKS = ['7','8','9','T','J','Q','K','A'];
+const RLABEL = {'6':'6','7':'7','8':'8','9':'9','T':'10','J':'J','Q':'Q','K':'K','A':'A'};
+const RNAME = {'6':'шестёрка','7':'семёрка','8':'восьмёрка','9':'девятка','T':'десятка','J':'валет','Q':'дама','K':'король','A':'туз'};
+const JORD = {C:4, S:3, H:2, D:1};
+const RORD = {'7':1,'8':2,'9':3,'Q':4,'K':5,'T':6,'A':7};
+const isTrump = (c, t) => c[0] === 'J' || c[1] === t;
+const eff = (c, t) => isTrump(c, t) ? 'T' : c[1];
+const power = (c, t) => c[0] === 'J' ? 100 + JORD[c[1]] : (c[1] === t ? 50 : 0) + RORD[c[0]];
+const S_ = i => 's' + i;
+function trickWinner(trick, t){
+  let best = trick[0];
+  for (const p of trick.slice(1)){
+    const pe = eff(p.card, t), be = eff(best.card, t);
+    if (pe === 'T' && be !== 'T') best = p;
+    else if (pe === be && power(p.card, t) > power(best.card, t)) best = p;
+  }
+  return best.seat;
+}
+function sortHand(hand, t){
+  const order = s => s === 'T' ? -1 : SUITS.indexOf(s);
+  return hand.slice().sort((a, b) => { const ea = eff(a, t), eb = eff(b, t); return ea !== eb ? order(ea) - order(eb) : power(b, t) - power(a, t); });
+}
+const EMOJI = ['👌','🤣','🤦‍♀️','🤦‍♂️','😎','😢','😍','🤔','😑','😴','🤬','💩','💪','🤜'];
+const EGGS_ICON = '<span class="eggs" title="Играем яйца" aria-label="Играем яйца"><svg viewBox="0 0 44 30"><ellipse cx="14" cy="17" rx="10" ry="12.5" fill="#f4ecd8" stroke="#c5a676" stroke-width="1.5"/><ellipse cx="30" cy="16" rx="10" ry="12.5" fill="#fbf6ea" stroke="#c5a676" stroke-width="1.5"/><ellipse cx="27" cy="10" rx="3" ry="4" fill="#fff" opacity=".8"/></svg></span>';
+// Статусы по уровню: 20–39 — плашка PRO, 40+ — золотая корона (только что-то одно).
+const PRO_LEVEL = 20, CROWN_LEVEL = 40;
+const CROWN_SVG = '<svg viewBox="0 0 40 26" aria-hidden="true"><path d="M3 22 L5 7 L13 14 L20 3 L27 14 L35 7 L37 22 Z" fill="#f2c14e" stroke="#9a6b12" stroke-width="1.6" stroke-linejoin="round"/><rect x="3" y="21" width="34" height="4" rx="1.5" fill="#e0a92c" stroke="#9a6b12" stroke-width="1.2"/><circle cx="20" cy="3.5" r="2.4" fill="#fff3c4" stroke="#9a6b12" stroke-width="1"/><circle cx="5" cy="7" r="2" fill="#fff3c4" stroke="#9a6b12" stroke-width="1"/><circle cx="35" cy="7" r="2" fill="#fff3c4" stroke="#9a6b12" stroke-width="1"/><circle cx="20" cy="16" r="2.2" fill="#c0392b"/><circle cx="12" cy="18" r="1.5" fill="#2a7ab9"/><circle cx="28" cy="18" r="1.5" fill="#2a7ab9"/></svg>';
+function rankBadge(level, size){
+  if (level >= CROWN_LEVEL) return `<span class="rank crown ${size || ''}" title="Уровень ${CROWN_LEVEL}+ — золотая корона" aria-label="Золотая корона">${CROWN_SVG}</span>`;
+  if (level >= PRO_LEVEL) return `<span class="rank pro ${size || ''}" title="Уровень ${PRO_LEVEL}+ — статус PRO" aria-label="PRO">PRO</span>`;
+  return '';
+}
+const PTS_WIN = 10, PTS_EGGS = 15, PTS_GOLAYA = 25, PTS_LEAVE = -5, LEVEL_PTS = 100, MAX_MISSES = 3;
+
+/* ================= состояние ================= */
+const S = { token:null, me:null, lobby:{rooms:[], playing:0, myRoom:null}, room:null, modal:null, modalData:null,
+  authTab:'login', authErr:'', busy:false, deadline:0, es:null, leaders:[], admin:null };
+try { S.token = localStorage.getItem('belka_token'); } catch(e){}
+
+const app = document.getElementById('app');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastT = 0;
+function toast(msg){ const el = document.getElementById('toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 3400); }
+const levelOf = p => Math.floor(Math.max(0, p || 0) / LEVEL_PTS) + 1;
+
+/* ================= сеть ================= */
+const netType = () => { try { return (navigator.connection && navigator.connection.type) || ''; } catch(e){ return ''; } };
+try { navigator.connection && navigator.connection.addEventListener('change', () => { if (S.token) post('/api/action', {type:'net'}).catch(() => {}); }); } catch(e){}
+async function post(url, data){
+  if (url === '/api/action') data = Object.assign({net:netType()}, data || {});
+  const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json', ...(S.token ? {Authorization:'Bearer ' + S.token} : {})}, body:JSON.stringify(data || {})});
+  let j = {}; try { j = await r.json(); } catch(e){}
+  if (r.status === 401){ signOut('Сессия закончилась, войдите снова.'); throw new Error('auth'); }
+  if (!r.ok) throw new Error(j.error || 'Ошибка связи.');
+  return j;
+}
+async function act(type, extra){
+  try {
+    const j = await post('/api/action', Object.assign({type}, S.room && !('room' in (extra || {})) ? {room:S.room.id} : {}, extra || {}));
+    if (j.room !== undefined) setRoom(j.room);
+    if (j.closed) setRoom(null);
+    return j;
+  } catch(e){ if (e.message !== 'auth') toast(e.message); return null; }
+}
+function connect(){
+  if (S.es) S.es.close();
+  const es = new EventSource('/events?t=' + encodeURIComponent(S.token) + '&net=' + encodeURIComponent(netType()));
+  S.es = es;
+  S.lastEvt = Date.now();
+  ['me','lobby','room','toast','social','notify','dm','ping'].forEach(n => es.addEventListener(n, () => { S.lastEvt = Date.now(); }));
+  es.addEventListener('me', e => { S.me = JSON.parse(e.data); render(); });
+  es.addEventListener('lobby', e => { S.lobby = JSON.parse(e.data); if (!S.room && !S.modal) render(); else if (!S.room) renderSoft(); else if (S.room.phase === 'waiting' && !S.modal) render(); });
+  es.addEventListener('room', e => { const r = JSON.parse(e.data); if (r === null){ if (S.room){ S.room = null; render(); } return; } if (!S.room || S.room.id === r.id) setRoom(r); });
+  es.addEventListener('toast', e => toast(JSON.parse(e.data)));
+  es.addEventListener('logout', e => signOut(JSON.parse(e.data)));
+  es.addEventListener('social', e => { S.social = JSON.parse(e.data); updateBadges(); loadFriends(); });
+  es.addEventListener('notify', e => { const n = JSON.parse(e.data); addNote(n); if (n.kind !== 'invite') loadFriends(); });
+  es.addEventListener('dm', e => {
+    const d = JSON.parse(e.data);
+    if (S.modal === 'dm' && S.dmWith && S.dmWith.id === d.from.id){ S.dmMsgs.push(d.msg); act('dmHistory', {uid:d.from.id, room:undefined}); rerenderKeep(); }
+    else addNote({kind:'dm', from:d.from, text:d.msg.text});
+  });
+  es.onerror = async () => {
+    S.lastEvt = 0; // поток оборвался — пока он не вернётся, стол обновляется опросом
+    // проверим, жива ли сессия
+    try { const r = await fetch('/api/action', {method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer ' + S.token}, body:'{"type":"leaders"}'}); if (r.status === 401) signOut('Сессия закончилась, войдите снова.'); } catch(e){}
+  };
+}
+function signIn(j){
+  setTimeout(loadFriends, 300);
+  S.token = j.token; S.me = j.me; S.authErr = '';
+  try { localStorage.setItem('belka_token', j.token); } catch(e){}
+  connect(); render();
+}
+function signOut(msg){
+  if (S.es){ S.es.close(); S.es = null; }
+  if (S.token) fetch('/api/logout', {method:'POST', headers:{Authorization:'Bearer ' + S.token}}).catch(() => {});
+  S.token = null; S.me = null; S.room = null; S.modal = null; S.notes = []; renderNotes(); S.friendsV = null; S.friendIds = new Set();
+  try { localStorage.removeItem('belka_token'); } catch(e){}
+  render(); if (msg) toast(msg);
+}
+let bubbleT = 0;
+function setRoom(r){
+  S.room = r;
+  clearTimeout(bubbleT);
+  if (r && r.bubbles) r.bubbles.forEach(b => { if (b) b.at = Date.now() - b.age; });
+  if (r && r.bubbles){ const ages = r.bubbles.filter(Boolean).map(b => 3500 - b.age); if (ages.length) bubbleT = setTimeout(() => { if (S.room){ S.room.bubbles = [null,null,null,null]; render(); } }, Math.max(...ages) + 60); }
+  if (r) S.deadline = r.left ? Date.now() + r.left : 0;
+  const ae = document.activeElement;
+  if (S.modal && ae && ae.id === 'rq') return; // не мешаем искать в рейтинге
+  render();
+}
+
+/* ================= друзья, личка, приглашения ================= */
+S.social = {requests:0, unread:0}; S.friendsV = null; S.friendIds = new Set(); S.pendingIds = new Set(); S.notes = []; S.dmMsgs = []; S.fTab = 'list';
+async function loadFriends(){
+  if (!S.token) return;
+  try {
+    const j = await post('/api/action', {type:'friends'});
+    S.friendsV = j; S.social = j.summary;
+    S.friendIds = new Set(j.friends.map(f => f.id)); S.pendingIds = new Set(j.outgoing.map(f => f.id));
+    updateBadges();
+    if (['friends', 'invite'].includes(S.modal)) rerenderKeep();
+  } catch(e){}
+}
+function updateBadges(){
+  const n = (S.social.requests || 0) + (S.social.unread || 0);
+  document.querySelectorAll('[data-badge]').forEach(b => { b.textContent = n > 99 ? '99+' : n; b.hidden = !n; });
+}
+function rerenderKeep(){ // перерисовать, не теряя фокус и текст в полях ввода
+  const ae = document.activeElement, id = ae && ae.id, pos = ae && ae.selectionStart;
+  render();
+  if (id){ const n = document.getElementById(id); if (n && n.focus){ n.focus(); try { n.setSelectionRange(pos, pos); } catch(e){} } }
+}
+function addNote(n){
+  n.nid = Math.random().toString(36).slice(2);
+  S.notes.push(n); if (S.notes.length > 4) S.notes.shift();
+  renderNotes();
+  const ttl = n.kind === 'invite' ? 60000 : n.kind === 'friendReq' ? 20000 : 7000;
+  setTimeout(() => dropNote(n.nid), ttl);
+}
+function dropNote(nid){ S.notes = S.notes.filter(x => x.nid !== nid); renderNotes(); }
+function renderNotes(){
+  const box = document.getElementById('notes');
+  box.innerHTML = S.notes.map(n => {
+    const who = n.from ? avatarHTML(n.from, 'sm') : '';
+    let btns = '';
+    if (n.kind === 'invite') btns = `<button class="btn sm pri green" data-na="acceptInv" data-nid="${n.nid}">Принять</button><button class="btn sm" data-na="close" data-nid="${n.nid}">Отклонить</button>`;
+    else if (n.kind === 'friendReq') btns = `<button class="btn sm pri green" data-na="acceptFr" data-nid="${n.nid}">Добавить</button><button class="btn sm" data-na="close" data-nid="${n.nid}">Позже</button>`;
+    else if (n.kind === 'dm') btns = `<button class="btn sm pri green" data-na="reply" data-nid="${n.nid}">Ответить</button>`;
+    const title = n.kind === 'dm' ? `<b>${esc(n.from.login)}</b>: ${esc(n.text)}` : esc(n.text);
+    return `<div class="note-card ${n.kind}" role="status">${who}<div class="nb"><div class="nt">${title}</div>${btns ? `<div class="row">${btns}</div>` : ''}</div><button class="nx" data-na="close" data-nid="${n.nid}" aria-label="Закрыть">×</button></div>`;
+  }).join('');
+  box.querySelectorAll('[data-na]').forEach(b => b.addEventListener('click', async () => {
+    const n = S.notes.find(x => x.nid === b.dataset.nid); dropNote(b.dataset.nid); if (!n) return;
+    if (b.dataset.na === 'acceptInv'){ const j = await act('inviteAccept', {room:n.room}); if (j && j.room){ S.modal = null; setRoom(j.room); } }
+    if (b.dataset.na === 'acceptFr'){ if (await act('friendAccept', {uid:n.from.id, room:undefined})){ toast(`${n.from.login} теперь ваш друг.`); loadFriends(); } }
+    if (b.dataset.na === 'reply') openDm(n.from.id);
+  }));
+}
+async function openDm(uid){
+  S.modal = 'dm'; S.dmWith = null; S.dmMsgs = []; render();
+  const j = await act('dmHistory', {uid, room:undefined});
+  if (j){ S.dmWith = j.with; S.dmMsgs = j.messages; if (S.modal === 'dm') render(); loadFriends(); }
+}
+function openFriends(tab){ S.modal = 'friends'; S.fTab = tab || (S.social.requests ? 'requests' : 'list'); render(); loadFriends(); }
+const whereChip = w => `<span class="where ${w && w.online ? 'on' : ''}"><i></i>${esc(w ? w.text : '')}</span>`;
+async function openPlayer(uid){
+  S.modal = 'player'; S.pcard = null; render();
+  const j = await act('playerCard', {uid, room:undefined});
+  if (j && S.modal === 'player'){ S.pcard = j.player; render(); }
+}
+function playerCardHTML(){
+  const p = S.pcard;
+  if (!p) return '<h2>Игрок</h2><p class="note">Загружаю…</p>';
+  const prog = Math.max(0, p.points || 0) % LEVEL_PTS;
+  const pct = p.games ? Math.round((p.wins || 0) / p.games * 100) + '%' : '—';
+  let fbtn = '';
+  const cbtn = p.isMe ? '' : p.complained ? '<span class="note">вы пожаловались на игрока</span>' : `<button class="btn sm danger" data-complain="${p.id}">⚑ Жалоба</button>`;
+  if (!p.isMe){
+    if (p.friend) fbtn = `<span class="chip fr">вы друзья</span><button class="btn sm pri green" data-dm="${p.id}">Написать</button>`;
+    else if (p.sent) fbtn = `<span class="note">заявка в друзья отправлена</span>`;
+    else fbtn = `<button class="btn pri green" data-pcadd="${p.id}">${p.got ? 'Принять заявку в друзья' : 'Добавить в друзья'}</button>`;
+  }
+  return `<div class="pcard">
+    ${avatarHTML(p, 'lg')}
+    <div class="grow">${rankBadge(p.level)}<div class="pname">${esc(p.login)}${p.isMe ? ' <small class="note">(это вы)</small>' : ''}</div>
+      <div class="plv">Уровень ${p.level}</div>
+      <div class="bar"><i style="width:${prog}%"></i></div>
+      <div class="note">${p.points || 0} очков · до уровня ${p.level + 1} осталось ${LEVEL_PTS - prog}</div>
+      ${whereChip(p.where)}</div>
+  </div>
+  <div class="pstats">
+    <div><b class="${p.rank && p.rank <= 3 ? 'rk' : ''}">${p.rank ? p.rank : '—'}</b><span>место в рейтинге${p.total ? ` из ${p.total}` : ''}</span></div>
+    <div><b>${p.games || 0}</b><span>партий</span></div>
+    <div><b>${p.wins || 0}</b><span>побед</span></div>
+    <div><b>${pct}</b><span>побед, %</span></div>
+    <div><b>${p.left || 0}</b><span>не доиграно</span></div>
+  </div>
+  ${fbtn || cbtn ? `<div class="row" style="justify-content:center">${fbtn}${cbtn}</div>` : ''}`;
+}
+function friendsModalHTML(){
+  const F = S.friendsV || {friends:[], incoming:[], outgoing:[]};
+  const tab = S.fTab;
+  const tabs = `<div class="tabs" role="tablist">
+    <button class="tab ${tab === 'list' ? 'on' : ''}" data-ftab="list">Друзья <small>${F.friends.length}</small></button>
+    <button class="tab ${tab === 'requests' ? 'on' : ''}" data-ftab="requests">Заявки ${F.incoming.length ? `<span class="bdg">${F.incoming.length}</span>` : ''}</button>
+    <button class="tab ${tab === 'find' ? 'on' : ''}" data-ftab="find">Найти</button></div>`;
+  let body = '';
+  if (tab === 'list'){
+    body = F.friends.length ? `<div class="flist">${F.friends.map(f => `<div class="frow">${avatarHTML(f, 'sm')}<div class="fi"><b>${esc(f.login)}</b> <span class="lv">ур. ${f.level}</span>${whereChip(f.where)}</div>
+      <button class="btn sm pri green" data-dm="${f.id}">Написать${f.unread ? ` <span class="bdg">${f.unread}</span>` : ''}</button>
+      <button class="btn sm" data-unfriend="${f.id}" title="Удалить из друзей">Удалить</button></div>`).join('')}</div>`
+      : `<p class="note">Пока нет друзей. Найдите игрока по логину во вкладке «Найти» или добавьте его прямо за столом.</p>`;
+  } else if (tab === 'requests'){
+    body = (F.incoming.length ? `<h3 class="sub3">Хотят дружить с вами</h3><div class="flist">${F.incoming.map(f => `<div class="frow">${avatarHTML(f, 'sm')}<div class="fi"><b>${esc(f.login)}</b> <span class="lv">ур. ${f.level}</span></div>
+      <button class="btn sm pri green" data-accept="${f.id}">Добавить</button><button class="btn sm" data-decline="${f.id}">Отклонить</button></div>`).join('')}</div>` : '<p class="note">Новых заявок нет.</p>')
+      + (F.outgoing.length ? `<h3 class="sub3">Вы отправили</h3><div class="flist">${F.outgoing.map(f => `<div class="frow">${avatarHTML(f, 'sm')}<div class="fi"><b>${esc(f.login)}</b> <span class="note">ждёт ответа</span></div><button class="btn sm" data-cancel="${f.id}">Отменить</button></div>`).join('')}</div>` : '');
+  } else {
+    const res = S.fFound || [];
+    body = `<input class="txt" id="fq" placeholder="Логин игрока (от 2 букв)" value="${esc(S.fq || '')}" autocomplete="off">
+      <div class="flist">${res.map(u => `<div class="frow">${avatarHTML(u, 'sm')}<div class="fi"><b>${esc(u.login)}</b> <span class="lv">ур. ${u.level}</span>${whereChip(u.where)}</div>
+        ${u.friend ? '<span class="note">уже друг</span>' : u.sent ? '<span class="note">заявка отправлена</span>' : `<button class="btn sm pri green" data-addf="${u.id}">${u.got ? 'Принять заявку' : 'В друзья'}</button>`}</div>`).join('') || (S.fq && S.fq.length >= 2 ? '<p class="note">Никого не нашли.</p>' : '')}</div>`;
+  }
+  return `<h2>Друзья</h2>${tabs}${body}`;
+}
+function dmModalHTML(){
+  const w = S.dmWith, meId = S.me && S.me.id;
+  if (!w) return '<h2>Сообщения</h2><p class="note">Загружаю…</p>';
+  const msgs = S.dmMsgs.map(m => `<div class="dmsg ${m.from === meId ? 'mine' : ''}"><span>${esc(m.text)}</span><small>${new Date(m.at).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}</small></div>`).join('');
+  return `<div class="dmhead">${avatarHTML(w, 'sm')}<div><b>${esc(w.login)}</b>${whereChip(w.where)}</div><button class="btn sm" id="dm-back">← Друзья</button></div>
+    <div class="dmlog" id="dmlog">${msgs || '<p class="note">Сообщений пока нет. Напишите первым.</p>'}</div>
+    ${w.friend ? `<form class="chat-form" id="dmform"><input class="txt" id="dmin" maxlength="500" autocomplete="off" placeholder="Сообщение для ${esc(w.login)}…" aria-label="Сообщение"><button class="btn pri green" type="submit" aria-label="Отправить">➤</button></form>` : '<p class="note">Вы больше не друзья — писать нельзя.</p>'}`;
+}
+function inviteModalHTML(){
+  const F = S.friendsV || {friends:[]};
+  const R = S.room;
+  const here = new Set((R ? R.seats : []).filter(v => v && v.id).map(v => v.id));
+  const list = F.friends.filter(f => f.where.online);
+  return `<h2>Пригласить друга</h2><p class="note">Другу придёт уведомление. Если он примет приглашение, то сядет на свободное место (или вместо бота).</p>
+    <div class="flist">${list.map(f => `<div class="frow">${avatarHTML(f, 'sm')}<div class="fi"><b>${esc(f.login)}</b> ${whereChip(f.where)}</div>
+      ${here.has(f.id) ? '<span class="note">уже за столом</span>' : S.invited && S.invited[f.id] ? '<span class="note">приглашён ✓</span>' : `<button class="btn sm pri green" data-inv="${f.id}">Пригласить</button>`}</div>`).join('')
+      || `<p class="note">${F.friends.length ? 'Сейчас никого из друзей нет в сети.' : 'У вас пока нет друзей. Добавьте их в лобби кнопкой «Друзья».'}</p>`}</div>`;
+}
+function bindSocial(){
+  const $ = id => document.getElementById(id);
+  app.querySelectorAll('[data-ftab]').forEach(b => b.addEventListener('click', () => { S.fTab = b.dataset.ftab; render(); if (S.fTab === 'find'){ const q = $('fq'); if (q) q.focus(); } }));
+  app.querySelectorAll('[data-dm]').forEach(b => b.addEventListener('click', () => openDm(b.dataset.dm)));
+  app.querySelectorAll('[data-unfriend]').forEach(b => b.addEventListener('click', async () => {
+    if (!b.dataset.armed){ b.dataset.armed = '1'; b.textContent = 'Точно?'; return; }
+    const j = await act('friendRemove', {uid:b.dataset.unfriend, room:undefined}); if (j){ S.friendsV = j; loadFriends(); }
+  }));
+  const fr = async (type, id) => { const j = await act(type, {uid:id, room:undefined}); if (j){ if (j.friends) S.friendsV = j; loadFriends(); } return j; };
+  app.querySelectorAll('[data-accept]').forEach(b => b.addEventListener('click', () => fr('friendAccept', b.dataset.accept)));
+  app.querySelectorAll('[data-decline]').forEach(b => b.addEventListener('click', () => fr('friendDecline', b.dataset.decline)));
+  app.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => fr('friendCancel', b.dataset.cancel)));
+  app.querySelectorAll('[data-addf]').forEach(b => b.addEventListener('click', async () => {
+    if (await fr('friendAdd', b.dataset.addf)){ toast('Заявка отправлена.'); searchFriends(S.fq); }
+  }));
+  app.querySelectorAll('[data-pcadd]').forEach(b => b.addEventListener('click', async () => {
+    const j = await act('friendAdd', {uid:b.dataset.pcadd, room:undefined});
+    if (j){ toast(S.pcard && S.pcard.got ? 'Теперь вы друзья.' : 'Заявка в друзья отправлена.'); loadFriends(); openPlayer(b.dataset.pcadd); }
+  }));
+  app.querySelectorAll('[data-addseat]').forEach(b => b.addEventListener('click', async () => {
+    if (await fr('friendAdd', b.dataset.addseat)){ toast('Заявка в друзья отправлена.'); S.pendingIds.add(b.dataset.addseat); render(); }
+  }));
+  const fq = $('fq');
+  if (fq) fq.addEventListener('input', () => { S.fq = fq.value; clearTimeout(S.fqT); S.fqT = setTimeout(() => searchFriends(S.fq), 250); });
+  const log = $('dmlog'); if (log) log.scrollTop = log.scrollHeight;
+  const dmin = $('dmin');
+  if (dmin){
+    dmin.value = S.dmDraft || '';
+    dmin.addEventListener('input', () => { S.dmDraft = dmin.value; });
+    $('dmform').addEventListener('submit', async e => {
+      e.preventDefault(); const text = dmin.value.trim(); if (!text || !S.dmWith) return;
+      S.dmDraft = ''; dmin.value = '';
+      const j = await act('dmSend', {uid:S.dmWith.id, text, room:undefined});
+      if (j && j.msg){ S.dmMsgs.push(j.msg); rerenderKeep(); const n = $('dmin'); if (n) n.focus(); } else S.dmDraft = text;
+    });
+  }
+  const back = $('dm-back'); if (back) back.addEventListener('click', () => openFriends('list'));
+  app.querySelectorAll('[data-inv]').forEach(b => b.addEventListener('click', async () => {
+    const j = await act('invite', {uid:b.dataset.inv}); if (j){ S.invited = S.invited || {}; S.invited[b.dataset.inv] = 1; toast('Приглашение отправлено.'); render(); }
+  }));
+}
+async function searchFriends(q){
+  if (!q || q.trim().length < 2){ S.fFound = []; if (S.modal === 'friends') rerenderKeep(); return; }
+  const j = await act('friendSearch', {q, room:undefined}); if (j){ S.fFound = j.users; if (S.modal === 'friends') rerenderKeep(); }
+}
+
+/* ================= аватарка ================= */
+function readAvatar(file){
+  return new Promise((res, rej) => {
+    if (!file) return res('');
+    if (!/^image\//.test(file.type)) return rej('Нужна картинка (jpg, png, webp).');
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = 128;
+      const k = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img, (img.width - k) / 2, (img.height - k) / 2, k, k, 0, 0, 128, 128);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', .82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej('Не удалось открыть картинку.'); };
+    img.src = url;
+  });
+}
+
+/* ================= отрисовка: общие куски ================= */
+function cardHTML(c, t, extra){
+  const cls = ['card', t && isTrump(c, t) ? 'tr' : '', extra || ''].join(' ');
+  return `<div class="${cls}" data-card="${c}" role="img" aria-label="${RNAME[c[0]]} ${SUIT_NAME[c[1]]}"><img src="cards/${c}.webp" alt="" draggable="false"></div>`;
+}
+const backHTML = cls => `<div class="card back ${cls || ''}" aria-hidden="true"><img src="cards/back.webp" alt="" draggable="false"></div>`;
+['back'].concat(SUITS.flatMap(s => ['6'].concat(RANKS).map(r => r + s))).forEach(n => { const i = new Image(); i.src = `cards/${n}.webp`; });
+function mini(c, win){ return `<span class="mini ${RED[c[1]]?'red':''} ${win?'win':''}">${RLABEL[c[0]]}${SYM[c[1]]}</span>`; }
+const COVER = [ {r:0,x:.05,y:.04}, {r:46,x:.73,y:.03}, {r:0,x:0,y:.40}, {r:-44,x:.02,y:1.16}, {r:0,x:0,y:.84}, {r:0,x:.38,y:.84}, {r:10,x:1.1,y:.2} ];
+function eyesHTML(n, tm){
+  // до 6: верхняя шестёрка рубашкой вверх; с 6 — лицом вверх, сдвигом открывает масти нижней
+  const suits = tm === 0 ? ['H','D'] : ['S','C'];
+  const up = n >= 6, c = COVER[up ? n - 6 : n], W = 40;
+  const tf = `transform:translate(${(c.x*W).toFixed(1)}px, ${(c.y*W).toFixed(1)}px) rotate(${c.r}deg)`;
+  const top = up ? cardHTML('6' + suits[1], null, 'xs cover" style="' + tf) : backHTML('xs cover" style="' + tf);
+  return `<div class="eyes-box" title="${n} глаз из 12"><div class="six">${cardHTML('6' + suits[0], null, 'xs')}${top}</div><span class="eyes-n">${n}<small>/12</small></span></div>`;
+}
+function avatarHTML(p, cls, fallback){
+  if (p && p.avatar) return `<span class="av ${cls || ''}"><img src="${esc(p.avatar)}" alt=""></span>`;
+  const t = p && p.name ? p.name[0].toUpperCase() : p && p.login ? p.login[0].toUpperCase() : (fallback || '?');
+  return `<span class="av ${cls || ''}">${esc(t)}</span>`;
+}
+const header = right => `<div class="top"><div class="logo"><img class="logo-img" src="logo-row.webp" alt="Belka" width="178" height="40"></div><div class="sp"></div>${right || ''}</div>`;
+const ICON = {
+  target:'<svg viewBox="0 0 24 24"><path d="M5 21V4h9l1 2h5v9h-7l-1-2H7v8z"/></svg>',
+  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 9v4.5l3 2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M9 2h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  cards:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="11" height="15" rx="2" transform="rotate(-12 8 12)"/><rect x="10" y="4" width="11" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+  wait:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6z"/><path d="M17 7v6M14 10h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24"><path d="M7 3h10v4a5 5 0 0 1-10 0zM4 4h3v3a3 3 0 0 1-3-3zM20 4h-3v3a3 3 0 0 0 3-3zM10 13h4v3h3v4H7v-4h3z"/></svg>',
+  lock:'<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
+  trash:'<svg viewBox="0 0 24 24"><path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 3v5h-5M4 21v-5h5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  people:'<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.4"/><circle cx="16.5" cy="8.5" r="2.8"/><path d="M1.5 20c0-4 3-6.5 6.5-6.5s6.5 2.5 6.5 6.5z"/><path d="M14.5 13.8c3.8-.8 8 1 8 6.2h-6.5"/></svg>'
+};
+function pointsRulesHTML(){
+  return `<div class="rules"><ul>
+    <li>Победа в партии: <b>+${PTS_WIN}</b>. Победа, когда в партии были яйца: <b>+${PTS_EGGS}</b>. Победа голой: <b>+${PTS_GOLAYA}</b>.</li>
+    <li>Поражение: 0. Ушли из начатой партии: <b>${PTS_LEAVE}</b>.</li>
+    <li>Не успели сходить за 20 секунд — за вас ходит бот. После ${MAX_MISSES}-го такого хода подряд вас сразу выводят из-за стола (<b>${PTS_LEAVE}</b>), а остальные играют дальше с ботом на вашем месте. Свой ход сбрасывает счётчик.</li>
+    <li>На ход даётся 20 секунд.</li>
+    <li>Каждые ${LEVEL_PTS} очков — новый уровень. С ${PRO_LEVEL} уровня над ником появляется плашка <b>PRO</b>, с ${CROWN_LEVEL} — золотая корона вместо неё.</li>
+    <li>Стол закрывается сам, когда за ним не остаётся живых игроков.</li>
+    <li><b>Жалоба</b> — кнопка рядом с ником. На каждого игрока можно пожаловаться один раз. Кто получил 10 жалоб, не может играть 1 час; после этого жалобы обнуляются.</li>
+    <li>Значок <b>IP</b> у ника: этот игрок сидит в одной Wi-Fi сети с кем-то ещё за столом. Для мобильного интернета значок не ставится. Сам адрес никому не показывается.</li>
+    <li>После партии стол снова собирает игроков: остаётесь — жмите «Готов». Если создатель вышел, стол остаётся, пока за ним есть живые игроки; создателем становится другой игрок.</li>
+    <li>−5 очков — только если выйти из уже начатой партии. Пока стол собирается, уйти можно без штрафа.</li>
+  </ul></div>`;
+}
+function rulesHTML(){
+  return `<div class="rules"><ul>
+    <li>На картах: J — валет, Q — дама, K — король, A — туз.</li>
+    <li>Колода 32 карты (от семёрки до туза), четыре игрока, две пары: сидящие напротив играют вместе.</li>
+    <li><b>Валеты всегда козыри</b>: J♣ старше J♠, дальше J♥ и J♦. Затем козырная масть: A, 10, K, Q, 9, 8, 7.</li>
+    <li>В первой раздаче козыри — трефы. Кому пришёл J♣, тот получает трефы «своей» мастью, партнёр — пики, левый соперник — червы, правый — бубны. Дальше козырем становится масть того, у кого окажется J♣.</li>
+    <li>Ходить обязательно в масть. Нет масти — можно козырнуть или сбросить любую карту, кроме неигранного туза: туза масти, в которую в этой раздаче ещё не заходили, сбрасывать нельзя (если есть другие карты). Заходить с такого туза можно.</li>
+    <li>Очки: туз 11, десятка 10, король 4, дама 3, валет 2. Всего 120.</li>
+    <li><b>Глаза</b> (выигрывает пара, набравшая 61+): в первой раздаче — всегда 2 глаза. Дальше: козырь был ваш — 1 глаз. Козырь был у соперников — 2 глаза, если они набрали спас (31 очко), и 3 глаза, если не набрали.</li>
+    <li><b>Яйца</b> — 60 на 60: глаза не открываются, следующая раздача разыгрывается на яйцах — кто её выиграет, открывает 4 глаза. <b>Голая</b> — все 8 взяток: партия выиграна сразу.</li>
+    <li>Побеждает пара, первой открывшая 12 глаз.</li>
+  </ul></div>`;
+}
+
+/* ================= экраны ================= */
+function render(){
+  const view = !S.token ? 'auth' : S.room ? 'table' : 'lobby';
+  app.className = 'wrap view-' + view;
+  if (view === 'auth') return renderAuth();
+  if (view === 'lobby') return renderLobby();
+  renderTable();
+}
+function renderSoft(){ // обновить лобби, не закрывая открытое окно
+  const ae = document.activeElement;
+  if (ae && (ae.tagName === 'INPUT')) return;
+  render();
+}
+
+function renderAuth(){
+  const reg = S.authTab === 'reg';
+  app.innerHTML = `<div class="hero-logo"><img src="logo.webp" alt="Belka" width="208" height="160"><span class="sub">карточная игра на четверых</span></div>
+    <div class="lobby">
+      <section class="panel auth">
+        <div class="tabs" role="tablist">
+          <button class="tab ${reg ? '' : 'on'}" id="tab-login" role="tab" aria-selected="${!reg}">Вход</button>
+          <button class="tab ${reg ? 'on' : ''}" id="tab-reg" role="tab" aria-selected="${reg}">Регистрация</button>
+        </div>
+        <form id="authform" class="form" autocomplete="on">
+          <label for="f-login">Логин</label>
+          <input class="txt" id="f-login" name="username" autocomplete="username" maxlength="16" required>
+          <label for="f-pw">Пароль</label>
+          <input class="txt" id="f-pw" type="password" name="password" autocomplete="${reg ? 'new-password' : 'current-password'}" required>
+          ${reg ? `<label for="f-pw2">Пароль ещё раз</label>
+          <input class="txt" id="f-pw2" type="password" autocomplete="new-password" required>
+          <label for="f-av">Аватарка (можно позже)</label>
+          <div class="avpick"><span class="av lg" id="avprev">?</span><input id="f-av" type="file" accept="image/*"></div>` : ''}
+          <div class="warn" id="autherr" ${S.authErr ? '' : 'hidden'}>${esc(S.authErr)}</div>
+          <button class="btn pri green" type="submit" id="authbtn">${reg ? 'Зарегистрироваться' : 'Войти'}</button>
+        </form>
+      </section>
+      <section class="panel"><h2>Очки и уровни</h2>${pointsRulesHTML()}<h2>Правила</h2>${rulesHTML()}</section>
+    </div>`;
+  const $ = id => document.getElementById(id);
+  $('tab-login').onclick = () => { S.authTab = 'login'; S.authErr = ''; render(); };
+  $('tab-reg').onclick = () => { S.authTab = 'reg'; S.authErr = ''; render(); };
+  let avData = '';
+  if ($('f-av')) $('f-av').addEventListener('change', async e => {
+    try { avData = await readAvatar(e.target.files[0]); $('avprev').innerHTML = avData ? `<img src="${avData}" alt="">` : '?'; }
+    catch(err){ toast(String(err)); }
+  });
+  $('authform').addEventListener('submit', async e => {
+    e.preventDefault();
+    const l = $('f-login').value.trim(), p = $('f-pw').value, p2 = $('f-pw2') ? $('f-pw2').value : '';
+    const err = m => { $('autherr').textContent = m; $('autherr').hidden = false; };
+    if (reg && p !== p2) return err('Пароли не совпадают.');
+    const btn = $('authbtn'); btn.disabled = true; btn.textContent = 'Проверяю…';
+    try { signIn(await post(reg ? '/api/register' : '/api/login', {login:l, password:p, avatar:avData})); if (reg) toast('Готово! Вы зарегистрированы.'); }
+    catch(e2){ err(e2.message); btn.disabled = false; btn.textContent = reg ? 'Зарегистрироваться' : 'Войти'; }
+  });
+}
+
+function slotHTML(v){
+  if (!v) return `<div class="slot empty"></div>`;
+  if (v.bot) return `<div class="slot"><span class="av xs bot">Б</span><span class="sl">${esc(v.name)}</span></div>`;
+  return `<div class="slot ${S.me && v.id === S.me.id ? 'me' : ''}">${avatarHTML(v, 'xs')}${rankBadge(v.level, 'xs')}<span class="sl">${esc(v.name)}</span>${v.ipGroup ? `<span class="chip ipc g${v.ipGroup}" title="В одной Wi-Fi сети с другим игроком за этим столом">IP</span>` : ''}<span class="slv">${v.level}</span></div>`;
+}
+function roomHTML(t){
+  const playing = t.phase === 'playing' || t.phase === 'dealEnd';
+  return `<div class="room ${playing ? 'live' : ''} ${t.private ? 'priv' : ''}" data-open="${esc(t.id)}" data-need-code="${t.private && !t.access ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(t.name)}">
+    <span class="rno">${esc(t.name)}</span>
+    <div class="slots">${slotHTML(t.seats[0])}${slotHTML(t.seats[2])}${slotHTML(t.seats[1])}${slotHTML(t.seats[3])}</div>
+    <div class="ricons">
+      <span class="ic" title="Свободных мест: ${t.seats.filter(v => !v).length}">${ICON.wait}<small>мест: ${t.seats.filter(v => !v).length}</small></span>
+      <span class="ic" title="20 секунд на ход">${ICON.clock}<small>20</small></span>
+      ${t.private ? `<span class="ic lock" title="Приватный стол — вход по коду">${ICON.lock}<small>${t.code || 'по коду'}</small></span>` : ''}
+      ${t.mine && !playing ? `<button class="ic del" data-del="${esc(t.id)}" title="Убрать стол" aria-label="Убрать стол">${ICON.trash}<small>убрать</small></button>` : ''}
+    </div>
+  </div>`;
+}
+function ratingHTML(){
+  const all = S.leaders || [];
+  const meId = S.me && S.me.id;
+  const myPos = all.findIndex(q => q.id === meId);
+  const q = (S.rateQ || '').trim().toLowerCase();
+  const rows = all.map((u, k) => ({u, pos:k + 1})).filter(x => !q || x.u.login.toLowerCase().includes(q));
+  const medal = p => p === 1 ? 'gold' : p === 2 ? 'silver' : p === 3 ? 'bronze' : '';
+  const pct = u => u.games ? Math.round((u.wins || 0) / u.games * 100) + '%' : '—';
+  return `<h2>Рейтинг игроков</h2>
+    <p class="note">${all.length ? `Всего игроков: ${all.length}.` : ''} ${myPos >= 0 ? `Ваше место: <b class="mypos">${myPos + 1}</b>.` : ''}</p>
+    <input class="txt" id="rq" placeholder="Найти игрока по логину" value="${esc(S.rateQ || '')}" autocomplete="off">
+    ${S.leadersLoading ? '<p class="note">Загружаю…</p>' : !rows.length ? '<p class="note">Никого не нашли.</p>' : `
+    <div class="rtable" role="table" aria-label="Рейтинг игроков">
+      <div class="rrow rhead" role="row"><span>#</span><span>Игрок</span><span>Ур.</span><span>Очки</span><span class="rx">Партий</span><span class="rx">Побед</span><span class="rx">%</span></div>
+      ${rows.map(({u, pos}) => `<div class="rrow ${u.id === meId ? 'me' : ''}" role="row">
+        <span class="rpos ${medal(pos)}">${pos}</span>
+        <span class="rname">${avatarHTML(u, 'sm')}${rankBadge(u.level, 'xs')}<span class="ln">${esc(u.login)}</span></span>
+        <span class="lv">${u.level}</span>
+        <span class="pp">${u.points || 0}</span>
+        <span class="rx">${u.games || 0}</span><span class="rx">${u.wins || 0}</span><span class="rx">${pct(u)}</span>
+      </div>`).join('')}
+    </div>`}`;
+}
+async function openRating(){
+  S.modal = 'rating'; S.rateQ = ''; S.leadersLoading = !S.leaders.length; render();
+  const j = await act('leaders');
+  S.leadersLoading = false;
+  if (j) S.leaders = j.leaders;
+  if (S.modal === 'rating') render();
+}
+function bindModal(){
+  const $ = id => document.getElementById(id);
+  const close = () => { S.modal = null; render(); };
+  const mc = $('mclose'); if (mc) mc.addEventListener('click', close);
+  const m = $('modal'); if (m) m.addEventListener('click', e => { if (e.target === m) close(); });
+  const rq = $('rq'); if (rq) rq.addEventListener('input', () => { S.rateQ = rq.value; const pos = rq.selectionStart; render(); const n = $('rq'); n.focus(); n.setSelectionRange(pos, pos); });
+  bindSocial();
+}
+function modalHTML(){
+  if (!S.modal) return '';
+  const p = S.me || {login:'…', points:0};
+  let body = '';
+  if (S.modal === 'profile'){
+    const lvl = levelOf(p.points), prog = Math.max(0, p.points || 0) % LEVEL_PTS;
+    body = `<h2>Профиль</h2>
+      <div class="prow">
+        <label class="avwrap" title="Сменить аватарку">${avatarHTML(p, 'lg')}<input id="avfile" type="file" accept="image/*" hidden><span class="avedit">сменить</span></label>
+        <div class="grow">${rankBadge(lvl)}<div class="pname">${esc(p.login)}</div><div class="plv">Уровень ${lvl}</div>
+          <div class="bar"><i style="width:${prog}%"></i></div>
+          <div class="note">${prog} / ${LEVEL_PTS} до уровня ${lvl + 1} · всего ${p.points || 0} очков</div></div>
+      </div>
+      <div class="stats"><span><b>${p.games || 0}</b> партий</span><span><b>${p.wins || 0}</b> побед</span><span><b>${p.left || 0}</b> не доиграно</span></div>
+      <div class="row"><button class="btn" id="training">Тренировка с ботами</button>${p.admin ? '<button class="btn" id="open-admin">Админ-панель</button>' : ''}<button class="btn" id="logout">Выйти</button></div>`;
+  } else if (S.modal === 'rating'){
+    body = ratingHTML();
+  } else if (S.modal === 'rules'){
+    body = `<h2>Очки и уровни</h2>${pointsRulesHTML()}<h2>Правила</h2>${rulesHTML()}`;
+  } else if (S.modal === 'private'){
+    const pr = S.privRoom && (S.lobby.rooms || []).find(t => t.id === S.privRoom);
+    body = `<h2>${pr ? esc(pr.name) + ' — приватный' : 'Найти приватный стол'}</h2>${pr ? '<p class="note">Этот стол закрыт замком. Введите код, который дал создатель стола.</p>' : ''}
+      <form id="privform" class="form"><label for="pcode">Код стола (4 цифры)</label>
+      <input class="txt code" id="pcode" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000">
+      <button class="btn pri green" type="submit">Войти за стол</button></form>`;
+  } else if (S.modal === 'create'){
+    body = `<h2>Новый стол</h2>
+      <p class="note">Вы сядете за стол первым. Пустые места можно отдать ботам. До начала игры вы можете убирать игроков.</p>
+      <div class="row"><button class="btn pri green" id="create-pub">Открытый стол</button><button class="btn" id="create-priv">${ICON.lock} Приватный по коду</button></div>`;
+  } else if (S.modal === 'player'){
+    body = playerCardHTML();
+  } else if (S.modal === 'friends'){
+    body = friendsModalHTML();
+  } else if (S.modal === 'dm'){
+    body = dmModalHTML();
+  } else if (S.modal === 'invite'){
+    body = inviteModalHTML();
+  } else if (S.modal === 'admin'){
+    const q = (S.adminQ || '').toLowerCase();
+    const users = (S.admin || []).filter(u => !q || u.login.toLowerCase().includes(q));
+    body = `<h2>Админ-панель</h2>
+      <p class="note">Пароли хранятся только в зашифрованном виде: их не видит никто, включая админа. Если игрок забыл пароль, задайте ему новый.</p>
+      <input class="txt" id="aq" placeholder="Поиск по логину" value="${esc(S.adminQ || '')}">
+      <div class="adm">${users.map(u => `<div class="arow">${avatarHTML(u, 'sm')}<span class="ln">${esc(u.login)}${u.admin ? ' <small>(админ)</small>' : ''}</span>
+        <span class="lv">ур. ${u.level}</span><span class="lv">жалоб: ${u.complaints || 0}${u.banUntil ? ' · бан до ' + new Date(u.banUntil).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) : ''}</span>
+        <input class="txt pts-in" type="number" min="0" value="${u.points}" data-pts="${u.id}" aria-label="Очки ${esc(u.login)}">
+        <button class="btn sm" data-setpts="${u.id}">Сохранить</button>
+        <button class="btn sm" data-resetpw="${u.id}">Новый пароль</button>
+        ${u.admin ? '' : `<button class="btn sm danger" data-deluser="${u.id}">Удалить</button>`}</div>`).join('')}</div>
+      <h2>Столы</h2>
+      <div class="adm">${(S.lobby.rooms || []).map(t => `<div class="arow"><span class="ln">${esc(t.name)}</span><span class="lv">${t.phase}</span><button class="btn sm danger" data-closeroom="${t.id}">Закрыть</button></div>`).join('') || '<p class="note">Нет открытых столов.</p>'}</div>`;
+  }
+  return `<div class="modal" id="modal"><div class="mbox panel" role="dialog" aria-modal="true"><button class="mclose" id="mclose" aria-label="Закрыть">×</button>${body}</div></div>`;
+}
+function renderLobby(){
+  const p = S.me || {login:'…', points:0};
+  const L = S.lobby;
+  const prog = Math.max(0, p.points || 0) % LEVEL_PTS;
+  app.innerHTML = `
+    <div class="lb">
+      <button class="lb-prof" id="open-profile" aria-label="Профиль">
+        ${avatarHTML(p, 'sm')}
+        <span class="lp-t">${rankBadge(levelOf(p.points), 'xs')}<b>${esc(p.login)}</b><small>ур. ${levelOf(p.points)}</small></span>
+        <span class="lp-bar"><i style="width:${prog}%"></i></span>
+      </button>
+      <section class="lb-list">
+        <div class="lb-head"><span class="upd">обновляется каждые 5 с</span><span>Найдено столов: ${L.rooms.length}</span>
+          <button class="sq" id="refresh" aria-label="Обновить список" title="Обновить">${ICON.refresh}</button></div>
+        ${banText() ? `<div class="warn ban">${esc(banText())}</div>` : ''}
+        <div class="rooms">${L.rooms.length ? L.rooms.map(roomHTML).join('') : `<p class="note empty-note">Столов пока нет. Нажмите «Новый стол» и позовите друзей.</p>`}</div>
+      </section>
+      <aside class="lb-side">
+        <div class="lb-btns">
+          <button class="btn big green" id="new-room">Новый стол</button>
+          <button class="btn big" id="find-priv">Найти приват</button>
+          <button class="btn big" id="return" ${L.myRoom ? '' : 'disabled'}>Возврат в игру</button>
+          <button class="btn big" id="open-friends">Друзья <span class="bdg" data-badge hidden></span></button>
+          <button class="btn big" id="open-rating2">Рейтинг игроков</button>
+        </div>
+        <div class="lb-stat online"><span class="dot-ic" aria-hidden="true"><i></i></span><span>Онлайн:</span><b>${L.online || 0}</b></div>
+        <div class="lb-stat">${ICON.people}<span>Столов играет:</span><b>${L.playing}</b></div>
+        <div class="lb-links"><button class="btn sm" id="open-rules">Правила</button></div>
+      </aside>
+    </div>${modalHTML()}`;
+  const $ = id => document.getElementById(id);
+  const on = (id, fn) => { const el = $(id); if (el) el.addEventListener('click', fn); };
+  const openM = m => async () => {
+    S.modal = m; render();
+    if (m === 'rating') return openRating();
+    if (m === 'admin'){ const j = await act('adminUsers'); if (j){ S.admin = j.users; if (S.modal === 'admin') render(); } }
+    const c = $('pcode'); if (c) c.focus();
+  };
+  on('open-profile', openM('profile'));
+  on('open-rating', openM('rating'));
+  on('open-rating2', openM('rating'));
+  on('open-friends', () => openFriends());
+  updateBadges();
+  on('open-rules', openM('rules'));
+  on('find-priv', () => { S.privRoom = null; openM('private')(); });
+  on('new-room', openM('create'));
+  on('open-admin', openM('admin'));
+  on('create-pub', () => { S.modal = null; act('create', {private:false}); });
+  on('create-priv', () => { S.modal = null; act('create', {private:true}); });
+  on('training', () => { S.modal = null; act('create', {training:true}); });
+  on('logout', () => signOut());
+  bindModal();
+  on('refresh', () => refreshLobby(true));
+  on('return', () => { if (L.myRoom) act('open', {id:L.myRoom, room:undefined}); });
+  const pf = $('privform'); if (pf) pf.addEventListener('submit', async e => {
+    e.preventDefault();
+    const code = $('pcode').value;
+    const j = S.privRoom ? await act('open', {id:S.privRoom, code, room:undefined}) : await act('findPrivate', {code});
+    if (j && j.room){ S.modal = null; S.privRoom = null; render(); }
+  });
+  const f = $('avfile'); if (f) f.addEventListener('change', async e => { try { const d = await readAvatar(e.target.files[0]); if (d && await act('avatar', {data:d})) toast('Аватарка обновлена.'); } catch(err){ toast(String(err)); } });
+  const aq = $('aq'); if (aq) aq.addEventListener('input', () => { S.adminQ = aq.value; const pos = aq.selectionStart; render(); const n = $('aq'); n.focus(); n.setSelectionRange(pos, pos); });
+  app.querySelectorAll('[data-open]').forEach(r => {
+    const go = () => {
+      if (r.dataset.needCode){ S.modal = 'private'; S.privRoom = r.dataset.open; render(); const c = document.getElementById('pcode'); if (c) c.focus(); return; }
+      act('open', {id:r.dataset.open, room:undefined});
+    };
+    r.addEventListener('click', go);
+    r.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  });
+  app.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    if (b.dataset.armed) act('deleteRoom', {id:b.dataset.del, room:undefined});
+    else { b.dataset.armed = '1'; b.querySelector('small').textContent = 'точно?'; }
+  }));
+  const reloadAdmin = async () => { const j = await act('adminUsers'); if (j){ S.admin = j.users; render(); } };
+  app.querySelectorAll('[data-setpts]').forEach(b => b.addEventListener('click', async () => {
+    const v = app.querySelector(`[data-pts="${b.dataset.setpts}"]`).value;
+    if (await act('adminSetPoints', {uid:b.dataset.setpts, points:+v})){ toast('Очки сохранены.'); reloadAdmin(); }
+  }));
+  app.querySelectorAll('[data-resetpw]').forEach(b => b.addEventListener('click', () => {
+    const row = b.closest('.arow');
+    if (row.querySelector('.newpw')) return;
+    row.insertAdjacentHTML('beforeend', `<form class="newpw"><input class="txt" type="text" minlength="6" placeholder="новый пароль" required><button class="btn sm pri">Задать</button></form>`);
+    const fm = row.querySelector('.newpw');
+    fm.querySelector('input').focus();
+    fm.addEventListener('submit', async e => { e.preventDefault(); if (await act('adminResetPw', {uid:b.dataset.resetpw, password:fm.querySelector('input').value})){ toast('Пароль изменён. Сообщите его игроку.'); fm.remove(); } });
+  }));
+  app.querySelectorAll('[data-deluser]').forEach(b => b.addEventListener('click', async () => {
+    if (!b.dataset.armed){ b.dataset.armed = '1'; b.textContent = 'Точно удалить?'; return; }
+    if (await act('adminDeleteUser', {uid:b.dataset.deluser})){ toast('Игрок удалён.'); reloadAdmin(); }
+  }));
+  app.querySelectorAll('[data-closeroom]').forEach(b => b.addEventListener('click', () => act('adminCloseRoom', {id:b.dataset.closeroom, room:undefined})));
+}
+
+/* ================= стол ================= */
+function teamLabel(tm){ const me = S.room.mySeat; if (me >= 0) return tm === me % 2 ? 'Мы' : 'Соперники'; return tm === 0 ? 'Пара 1–3' : 'Пара 2–4'; }
+function teamCls(tm){ const me = S.room.mySeat; const base = me >= 0 ? me % 2 : 0; return tm === base ? 'a' : 'b'; }
+function seatName(i){ const v = S.room.seats[i]; return !v ? 'Свободно' : v.name; }
+
+function seatHTML(i, pos){
+  const R = S.room, v = R.seats[i], me = R.mySeat;
+  const turnHere = R.phase === 'playing' && R.turn === i && R.trick.length < 4;
+  const cls = ['seat', pos + '-s', v ? teamCls(i % 2) : 'empty', turnHere ? 'turn' : '', v && !v.bot && !v.online ? 'off' : ''].join(' ');
+  const avRaw = !v ? `<span class="av">+</span>` : v.bot ? `<span class="av">Б</span>` : avatarHTML(v);
+  const readyMark = R.phase === 'waiting' && v && v.ready && i !== me ? '<i class="rdy" title="Готов" aria-label="готов">✓</i>' : '';
+  const av = readyMark ? `<span class="avbox">${avRaw}${readyMark}</span>` : avRaw;
+  const ipTitle = 'Этот игрок сидит в той же Wi-Fi сети, что и другой игрок за столом. Возможно, они рядом и видят карты друг друга.';
+  const ipChip = v && v.ipGroup ? `<span class="chip ipc g${v.ipGroup}" title="${ipTitle}" aria-label="${ipTitle}">IP${v.ipGroup > 1 ? ' ' + v.ipGroup : ''}</span>` : '';
+  // Под ником — только уровень (и значок IP, если игроки в одной Wi-Fi сети).
+  const cmp = v && v.id && S.me && v.id !== S.me.id && !R.training
+    ? (v.complained ? '<span class="chip cmp done" title="Вы уже пожаловались">жалоба ✓</span>' : `<button class="chip cmp" data-complain="${v.id}" title="Пожаловаться на игрока">⚑ Жалоба</button>`) : '';
+  let info = v && !v.bot ? `<div class="si">${ipChip}<span class="chip">ур. ${v.level}</span>${cmp}</div>` : '';
+  if (R.phase !== 'waiting'){
+    const n = R.counts[i];
+    if (pos !== 'me') info += `<div class="backs" aria-label="${n} карт">${'<i></i>'.repeat(n)}</div>`;
+    const chips = [];
+    if (R.suitOwner){ const s = R.suitOwner[S_(i)]; chips.push(`<span class="chip ${R.owner === i ? 'own' : ''}" title="Своя масть"><span class="s ${RED[s] && R.owner !== i ? 'red' : ''}">${SYM[s]}</span>${R.owner === i ? ' козырь' : ''}</span>`); }
+    if (R.dealer === i) chips.push(`<span class="chip">сдаёт</span>`);
+    info += `<div class="si">${chips.join('')}</div>`;
+  }
+  if (R.phase === 'waiting' && v){
+    if (i === me) info += `<button class="btn ready-btn ${v.ready ? 'is-ready' : 'pri green'}" id="ready" aria-pressed="${!!v.ready}">${v.ready ? '✓ Готов' : 'Готов'}</button>${v.ready ? '<span class="note ready-note">нажмите ещё раз, чтобы отменить</span>' : ''}`;
+
+  }
+  if (turnHere && v && !v.bot && !R.training) info += `<div class="tbar"><i data-timer></i></div>`;
+  let btns = '';
+
+  if (!R.training){
+    if (!v && R.phase === 'waiting' && me < 0) btns += `<button class="btn sm pri" data-sit="${i}">Сесть</button>`;
+    if (v && v.bot && me < 0 && R.phase !== 'over') btns += `<button class="btn sm pri" data-sit="${i}">Сесть вместо бота</button>`;
+    if (!v && R.phase === 'waiting' && me >= 0) btns += `<button class="btn sm" data-bot="${i}">+ бот</button>`;
+    if (R.phase === 'waiting' && R.host && v && i !== me) btns += `<button class="btn sm" data-kick="${i}">${v.bot ? 'Убрать бота' : 'Убрать игрока'}</button>`;
+  }
+  const bb = R.bubbles && R.bubbles[i];
+  const bubble = bb ? `<span class="bubble" style="animation-delay:-${Date.now() - bb.at}ms" aria-label="${esc(seatName(i))}: ${bb.e}">${bb.e}</span>` : '';
+  const who = v && v.id
+    ? `<button class="pbtn" data-player="${v.id}" title="Рейтинг игрока ${esc(seatName(i))}" aria-label="Карточка игрока ${esc(seatName(i))}">${rankBadge(v.level)}${av}<span class="sn">${esc(seatName(i))}</span></button>`
+    : `${av}<div class="sn">${esc(seatName(i))}</div>`;
+  return `<div class="${cls}">${bubble}${who}${info}${btns ? `<div class="row" style="justify-content:center">${btns}</div>` : ''}</div>`;
+}
+function resultHTML(){
+  const R = S.room, r = R.result; if (!r) return '';
+  const me = R.mySeat, my = me >= 0 ? me % 2 : 0, who = teamLabel;
+  const ptsLine = `Очки: ${who(my)} ${r.pts[my]} — ${who(1-my)} ${r.pts[1-my]}`;
+  let h = '', p = '';
+  if (r.kind === 'golaya'){ h = 'Голая!'; p = `${who(r.team)} забрали все взятки и выигрывают партию.`; }
+  else if (r.kind === 'eggs'){ h = 'Яйца'; p = ''; }
+  else {
+    const e = r.eyes, word = e === 1 ? 'глаз' : e < 5 ? 'глаза' : 'глаз';
+    h = `${who(r.team)} +${e} ${word}`;
+    p = '';
+  }
+  let btn = '';
+  if (R.phase === 'over'){
+    h = R.winner === my && me >= 0 ? 'Партия ваша!' : `Победили: ${who(R.winner)}`;
+    p = (r.kind === 'golaya' ? 'Голая! ' : '') + `Счёт по глазам ${R.eyes[my]} : ${R.eyes[1-my]}.`;
+    if (me >= 0 && !R.training) p += R.gain ? ` Вам +${R.gain} очков.` : ' Очков за поражение нет.';
+    if (!R.training) btn = `<p class="note" id="cd" data-kind="close"></p>${me >= 0 ? `<div class="row" style="justify-content:center"><button class="btn pri green" id="again">Новая партия</button><button class="btn sm" id="to-lobby">В лобби</button></div>` : ''}`;
+    else if (me >= 0) btn = `<button class="btn pri green" id="again">Новая партия</button>`;
+  } else btn = `<p class="note" id="cd"></p>${me >= 0 ? `<button class="btn sm" id="next">Сдать сейчас</button>` : ''}`;
+  return `<div class="overlay"><h3>${esc(h)}</h3><p>${esc(ptsLine)}</p>${p ? `<p class="note">${esc(p)}</p>` : ''}${btn}</div>`;
+}
+const on0 = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+function lobbyInfoHTML(){
+  const L = S.lobby || {rooms:[]};
+  const cur = S.room && S.room.id;
+  const free = (L.rooms || []).filter(t => t.id !== cur && !t.private && t.phase === 'waiting' && t.seats.some(v => !v)).length;
+  return `<div class="lobby-info" aria-live="polite">
+    <span><i class="dot"></i>Онлайн: <b>${L.online || 0}</b></span>
+    <span>Свободных столов в лобби: <b>${free}</b></span>
+    <span>Идёт игр: <b>${L.playing || 0}</b></span>
+  </div>`;
+}
+function chatHTML(canWrite){
+  const R = S.room, meId = S.me && S.me.id;
+  const msgs = (R.chat || []).map(m => `<div class="msg ${m.uid === meId ? 'mine' : ''}"><b>${esc(m.name)}</b><span>${esc(m.text)}</span></div>`).join('');
+  return `<div class="chat">
+    <div class="chat-log" id="chatlog" aria-live="polite">${msgs || '<p class="note">Пока тихо. Поздоровайтесь с соперниками.</p>'}</div>
+    ${canWrite ? `<form class="chat-form" id="chatform"><input class="txt" id="chatin" maxlength="200" autocomplete="off" placeholder="Написать за стол…" aria-label="Сообщение"><button class="btn pri green" type="submit" aria-label="Отправить">➤</button></form>` : ''}
+  </div>`;
+}
+function renderTable(){
+  const R = S.room, me = R.mySeat, base = me >= 0 ? me : 0;
+  const rel = k => (base + k) % 4, posOf = seat => (seat - base + 4) % 4;
+  const ta = me >= 0 ? me % 2 : 0, tb = 1 - ta;
+  const dealPts = tm => R.phase === 'waiting' ? '' : `<div class="pts">в раздаче <b>${R.taken[tm]}</b> · взяток ${R.tricks[tm]}</div>`;
+  const score = R.phase === 'waiting' ? '' : `
+    <div class="score">
+      <div class="team ${teamCls(ta)}"><span class="tn">${teamLabel(ta)}</span>${eyesHTML(R.eyes[ta], ta)}${dealPts(ta)}</div>
+      <div class="trumpbox"><span class="lbl">козырь</span><div class="sym ${RED[R.trump] ? 'red' : 'blk'}" aria-label="Козырь: ${SUIT_NAME[R.trump]}">${SYM[R.trump]}</div>${R.eggs ? EGGS_ICON : `<span class="lbl">раздача ${R.dealNo}</span>`}</div>
+      <div class="team r ${teamCls(tb)}"><span class="tn">${teamLabel(tb)}</span>${eyesHTML(R.eyes[tb], tb)}${dealPts(tb)}</div>
+    </div>`;
+  let mid = '';
+  S.inviteBtn = '';
+  if (R.phase === 'waiting'){
+    const full = R.seats.every(Boolean);
+    const iReady = me >= 0 && R.seats[me].ready;
+    const waitingFor = R.seats.filter(v => v && !v.bot && !v.ready).map(v => v.name);
+    const msg = !full ? 'Садитесь за стол. Пустые места можно отдать ботам.' : waitingFor.length ? 'Ждём готовности: ' + esc(waitingFor.join(', ')) : 'Все готовы, сдаём карты…';
+    // Без всплывающего окна: короткая подсказка в центре стола, кнопка «Готов» — под своим ником.
+    mid = `<div class="wait-hint"><b>${full && !waitingFor.length ? 'Сдаём карты…' : 'Ждём игроков'}</b><span>${msg}</span>${me < 0 ? '<span>Выберите место, чтобы играть.</span>' : ''}</div>`;
+    const ipNames = {}; R.seats.forEach(v => { if (v && v.ipGroup) (ipNames[v.ipGroup] = ipNames[v.ipGroup] || []).push(v.name); });
+    const ipWarn = Object.values(ipNames).map(ns => `<div class="ipwarn"><span class="chip ipc">IP</span> ${ns.map(esc).join(' и ')} — возможно рядом</div>`).join('');
+    const canInvite = me >= 0 && !R.training && R.seats.some(v => !v || v.bot);
+    S.inviteBtn = canInvite ? '<div class="topline"><button class="btn sm pri green" id="invite-btn">Пригласить друга</button></div>' : '';
+    S.waitInfo = `<div class="waitbar">${ipWarn}
+      ${R.private && R.code ? `<span>Код стола для друзей: <b class="codeb">${esc(R.code)}</b></span>` : ''}
+      <span class="note">Игра начнётся сама, когда все места заняты и все нажали «Готов».</span>
+      ${lobbyInfoHTML()}</div>`;
+  } else {
+    const w = R.trick.length === 4 ? trickWinner(R.trick, R.trump) : -1;
+    mid = R.trick.map(x => `<div class="tc p${posOf(x.seat)} ${x.seat === w ? 'win' : ''}">${cardHTML(x.card, R.trump)}</div>`).join('');
+    if (R.phase === 'dealEnd' || R.phase === 'over') mid += `<div class="center-msg">${resultHTML()}</div>`;
+  }
+  let handBlock;
+  if (me >= 0){
+    const hand = sortHand(R.hand || [], R.trump);
+    const myTurn = R.legal && R.legal.length > 0;
+    const cards = hand.map(c => cardHTML(c, R.phase === 'waiting' ? null : R.trump, myTurn ? (R.legal.includes(c) ? 'ok' : 'no') : '')).join('');
+    let status = '';
+    if (R.phase === 'playing'){
+      if (myTurn) status = `<b>Ваш ход${R.training ? '' : ' · <span id="tt"></span>'}.</b> ` + (R.trick.length ? 'Нужно ходить в масть, если она есть.' : 'Заходите с любой карты.');
+      else if (R.trick.length === 4) status = `Взятку забирает ${esc(seatName(trickWinner(R.trick, R.trump)))}`;
+      else status = `Ходит ${esc(seatName(R.turn))}`;
+      if (R.misses > 0) status += ` <span class="miss">Бот ходил за вас: ${R.misses} из ${MAX_MISSES}${R.misses === MAX_MISSES - 1 ? ' — ещё раз, и вас выведут из-за стола' : ''}</span>`;
+    }
+    handBlock = R.phase === 'waiting'
+      ? `<div class="hand-wrap waiting"><div class="me-line">${seatHTML(me, 'me')}</div>${S.waitInfo || ''}${chatHTML(true)}</div>`
+      : `<div class="hand-wrap"><div class="status">${status}</div><div class="hand ${myTurn ? '' : 'idle'}" id="hand">${cards}</div><div class="me-line">${seatHTML(me, 'me')}</div></div>`;
+  } else handBlock = `<div class="hand-wrap ${R.phase === 'waiting' ? 'waiting' : ''}"><div class="me-line">${seatHTML(0, 'me')}</div><div class="status">${R.phase === 'waiting' ? 'Выберите свободное место.' : 'Вы смотрите игру.'}</div>${R.phase === 'waiting' ? (S.waitInfo || '') + chatHTML(false) : ''}</div>`;
+  const emo = me >= 0 && R.phase !== 'waiting' && !R.training
+    ? `<div class="emo-wrap"><button class="btn sm emo-btn" id="emo" aria-expanded="${!!S.emoOpen}" aria-label="Эмодзи">😊</button>${S.emoOpen ? `<div class="emo-pal" role="menu">${EMOJI.map(e => `<button class="emo" data-emo="${e}" role="menuitem">${e}</button>`).join('')}</div>` : ''}</div>` : '';
+  const last = R.lastTrick ? `<div class="last">Прошлая взятка: ${R.lastTrick.cards.map(x => mini(x.card, x.seat === R.lastTrick.winner)).join('')}</div>` : '<span></span>';
+  let leaveBtn = '';
+  if (me >= 0 && !R.training){
+    const midGame = R.phase === 'playing' || R.phase === 'dealEnd';
+    const isHost = R.seats[me] && R.seats[me].host;
+    leaveBtn = `<button class="btn sm" id="leave">${midGame ? `Уйти из партии (${PTS_LEAVE} очков)` : 'Встать из-за стола'}</button>`;
+  } else if (R.training) leaveBtn = `<button class="btn sm" id="leave">Закончить тренировку</button>`;
+  app.innerHTML = header(`<span class="sub">${esc(R.training ? 'Тренировка' : R.name)}${R.private && R.code && !R.training ? ' · код ' + esc(R.code) : ''}</span><button class="btn sm" id="back">← Столы</button>${S.inviteBtn || ''}`) + score + `
+    <div class="board">${seatHTML(rel(2), 'top')}${seatHTML(rel(1), 'left')}<div class="mid">${mid}</div>${seatHTML(rel(3), 'right')}</div>
+    ${handBlock}
+    <div class="side">${last}${emo}${leaveBtn}</div>${S.modal ? modalHTML() : ''}`;
+  const $ = id => document.getElementById(id);
+  app.querySelectorAll('[data-player]').forEach(b => b.addEventListener('click', () => openPlayer(b.dataset.player))); on0('invite-btn', () => { S.modal = 'invite'; render(); loadFriends(); }); bindModal(); updateBadges();
+  const log = $('chatlog'); if (log) log.scrollTop = log.scrollHeight;
+  const ci = $('chatin');
+  if (ci){
+    ci.value = S.chatDraft || '';
+    if (S.chatFocus){ ci.focus(); ci.setSelectionRange(ci.value.length, ci.value.length); }
+    ci.addEventListener('input', () => { S.chatDraft = ci.value; });
+    ci.addEventListener('focus', () => { S.chatFocus = true; });
+    ci.addEventListener('blur', () => { setTimeout(() => { if (document.activeElement !== $('chatin')) S.chatFocus = false; }, 0); });
+    $('chatform').addEventListener('submit', async e => {
+      e.preventDefault();
+      const text = ci.value.trim(); if (!text) return;
+      S.chatDraft = ''; ci.value = '';
+      if (!await act('chat', {text})) S.chatDraft = text;
+    });
+  }
+  on0('emo', () => { S.emoOpen = !S.emoOpen; render(); });
+  app.querySelectorAll('[data-emo]').forEach(b => b.addEventListener('click', () => { S.emoOpen = false; act('emoji', {e:b.dataset.emo}); }));
+  const on = (id, fn) => { const el = $(id); if (el) el.addEventListener('click', fn); };
+  on('back', async () => { const j = await act('toLobby'); S.room = null; if (j && j.lobby) S.lobby = j.lobby; render(); });
+  on('ready', () => act('ready'));
+  on('next', () => act('next'));
+  on('again', () => act('newMatch'));
+  on('to-lobby', async () => { const j = await act('toLobby'); S.room = null; if (j && j.lobby) S.lobby = j.lobby; render(); });
+  const lv = $('leave');
+  if (lv) lv.addEventListener('click', async () => {
+    const midGame = (R.phase === 'playing' || R.phase === 'dealEnd') && !R.training;
+    if (midGame && !lv.dataset.armed){ lv.dataset.armed = '1'; lv.textContent = `Точно уйти? ${PTS_LEAVE} очков`; lv.classList.add('danger'); return; }
+    await act('stand'); if (R.training || !S.room || S.room.mySeat < 0){ const j = await act('toLobby'); S.room = null; if (j && j.lobby) S.lobby = j.lobby; render(); }
+  });
+  app.querySelectorAll('[data-sit]').forEach(b => b.addEventListener('click', () => act('sit', {seat:+b.dataset.sit})));
+  app.querySelectorAll('[data-bot]').forEach(b => b.addEventListener('click', () => act('addBot', {seat:+b.dataset.bot})));
+  app.querySelectorAll('[data-kick]').forEach(b => b.addEventListener('click', () => act('kick', {seat:+b.dataset.kick})));
+  const hand = $('hand');
+  if (hand) hand.addEventListener('click', e => {
+    const c = e.target.closest('.card'); if (!c || !R.legal || !R.legal.length) return;
+    // если ход не по правилам — сервер объяснит почему (масть хода или неигранный туз)
+    act('play', {card:c.dataset.card});
+  });
+  tickTimers();
+}
+function tickTimers(){
+  if (!S.room) return;
+  const left = Math.max(0, S.deadline - Date.now());
+  const cd = document.getElementById('cd');
+  if (cd){ const s = Math.ceil(left / 1000);
+    cd.textContent = cd.dataset.kind === 'close' ? (s > 0 ? `Новая партия за этим столом через ${s} с` : 'Готовим стол…') : (s > 0 ? `Следующая раздача через ${s} с` : 'Сдаём…'); }
+  document.querySelectorAll('[data-timer]').forEach(t => { t.style.width = (left / S.room.turnMs * 100).toFixed(1) + '%'; t.classList.toggle('low', left < 6000); });
+  const tt = document.getElementById('tt'); if (tt) tt.textContent = Math.ceil(left / 1000) + ' с';
+}
+setInterval(tickTimers, 250);
+
+/* ---- лобби обновляется каждые 5 секунд (и сразу при любых изменениях) ---- */
+async function refreshLobby(manual){
+  if (!S.token || S.room) return;
+  const sq = document.getElementById('refresh');
+  if (sq){ sq.classList.remove('spin'); void sq.offsetWidth; sq.classList.add('spin'); }
+  try {
+    const j = await post('/api/action', {type:'lobby'});
+    if (j && j.lobby && !S.room){ S.lobby = j.lobby; S.lobbyAt = Date.now(); if (!S.modal) render(); else renderSoft(); }
+    if (manual) toast('Список обновлён.');
+  } catch(e){ if (manual && e.message !== 'auth') toast(e.message); }
+}
+setInterval(() => { if (!document.hidden){ refreshLobby(false); if (['friends', 'invite'].includes(S.modal)) loadFriends(); } }, 5000);
+
+/* ---- жалобы ---- */
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-complain]'); if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  if (!b.dataset.armed){ b.dataset.armed = '1'; b.textContent = 'Точно пожаловаться?'; b.classList.add('armed'); return; }
+  const j = await act('complain', {uid:b.dataset.complain, room:undefined});
+  if (j){ toast('Жалоба отправлена.'); if (S.modal === 'player' && S.pcard) openPlayer(S.pcard.id); }
+}, true);
+const banText = () => S.me && S.me.banUntil > Date.now() ? `На вас пожаловались 10 игроков. Играть можно будет в ${new Date(S.me.banUntil).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}.` : '';
+
+/* ---- запасной режим: если живой поток событий не доходит (так бывает на обычных хостингах),
+   состояние стола раз в 2 секунды запрашивается напрямую ---- */
+setInterval(async () => {
+  if (!S.token || !S.room || document.hidden) return;
+  if (Date.now() - (S.lastEvt || 0) < 20000) return;
+  try { const j = await post('/api/action', {type:'open', id:S.room.id}); if (j && j.room && S.room && j.room.rev !== S.room.rev) setRoom(j.room); }
+  catch(e){ if (/закрыт/.test(e.message)){ S.room = null; render(); } }
+}, 1500);
+
+/* ================= запуск ================= */
+if (S.token){ connect(); setTimeout(loadFriends, 300); }
+render();
+})();
+</script>
+
+</body>
+</html>

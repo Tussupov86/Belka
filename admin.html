@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Белка — админ</title>
+<link rel="icon" href="icon.png">
+<style>
+:root{color-scheme:dark; --bg:#0c2724; --panel:#12332f; --line:rgba(236,230,214,.12); --ink:#ece6d6; --muted:#9fb8b0; --brass:#d9a84e; --green:#6fd13a; --red:#ef7b6b}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font:15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding:16px}
+.wrap{max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
+header{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+header img{height:34px}
+header h1{font-size:18px; margin:0; font-weight:600}
+header .sp{flex:1}
+.upd{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.upd i{display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green); margin-right:6px; vertical-align:1px}
+.upd.err i{background:var(--red)}
+button{font:inherit; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--ink); padding:7px 12px; border-radius:8px; cursor:pointer}
+button:hover{background:rgba(255,255,255,.1)}
+button.pri{background:var(--brass); color:#1e1709; border-color:transparent; font-weight:600}
+.hero{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px}
+.tile{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:4px}
+.tile .v{font-size:40px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1}
+.tile .l{color:var(--muted); font-size:13px}
+.tile .s{font-size:12px; color:var(--muted)}
+.tile .s b{color:var(--ink); font-weight:600}
+.tile.on .v{color:var(--green)}
+.grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px}
+.grid .tile .v{font-size:26px}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px}
+.panel h2{font-size:14px; margin:0 0 10px; font-weight:600}
+.chart{position:relative}
+.chart svg{width:100%; height:180px; display:block}
+.tip{position:absolute; pointer-events:none; background:#081c1a; border:1px solid var(--line); border-radius:8px; padding:5px 8px; font-size:12px; white-space:nowrap; transform:translate(-50%,-110%)}
+.tip b{font-size:14px}
+table{width:100%; border-collapse:collapse; font-size:14px}
+td,th{padding:6px 4px; border-bottom:1px solid var(--line); text-align:left}
+th{color:var(--muted); font-weight:500; font-size:12px}
+td.n{font-variant-numeric:tabular-nums; color:var(--muted)}
+.login{max-width:340px; margin:10vh auto; display:flex; flex-direction:column; gap:10px}
+.login input{font:inherit; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:#081c1a; color:var(--ink)}
+.err{color:var(--red); font-size:13px; min-height:18px}
+.note{color:var(--muted); font-size:13px}
+@media (max-width:640px){ .hero{grid-template-columns:1fr} .grid{grid-template-columns:repeat(2, minmax(0,1fr))} .tile .v{font-size:34px} }
+nav.tabs{display:flex; gap:6px; flex-wrap:wrap}
+nav.tabs button.on{background:var(--brass); color:#1e1709; border-color:transparent; font-weight:600}
+.tools{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px}
+.tools input, .row input, textarea{font:inherit; padding:7px 10px; border-radius:8px; border:1px solid var(--line); background:#081c1a; color:var(--ink)}
+.tools input{flex:1; min-width:160px}
+.ulist{display:flex; flex-direction:column; gap:6px; max-height:65vh; overflow:auto}
+.urow{display:grid; grid-template-columns:minmax(120px,1.2fr) 60px 80px minmax(0,2.4fr); gap:8px; align-items:center; padding:8px 10px; background:rgba(0,0,0,.18); border-radius:10px}
+.urow .nm b{display:block} .urow .nm small{color:var(--muted); font-size:11px}
+.urow .acts{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
+.urow .acts input{width:84px; padding:5px 8px; font:inherit; border-radius:8px; border:1px solid var(--line); background:#081c1a; color:var(--ink)}
+.urow button{padding:5px 9px; font-size:13px}
+.danger{border-color:var(--red)!important; color:var(--red)}
+.badge{display:inline-block; font-size:11px; padding:1px 6px; border-radius:99px; background:rgba(239,123,107,.18); color:#ffb4a8; margin-left:4px}
+.badge.ok{background:rgba(111,209,58,.15); color:#a8e38a}
+.toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:#f4ecd8; color:#1c1d22; padding:9px 14px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,.4); z-index:50}
+textarea{width:100%; min-height:80px; resize:vertical}
+@media (max-width:720px){ .urow{grid-template-columns:1fr 50px 70px} .urow .acts{grid-column:1/-1; justify-content:flex-start} }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+(() => {
+const app = document.getElementById('app');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let token = null; try { token = localStorage.getItem('belka_stats_token'); } catch(e){}
+let data = null, lastOk = 0, timer = null, tab = 'stats', users = [], roomsList = [], q = '';
+const toastEl = document.createElement('div'); toastEl.className = 'toast'; toastEl.hidden = true; document.body.appendChild(toastEl);
+let tT = 0; function toast(m){ toastEl.textContent = m; toastEl.hidden = false; clearTimeout(tT); tT = setTimeout(() => toastEl.hidden = true, 3000); }
+async function act(type, extra){
+  const r = await fetch('/api/action', {method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer ' + token}, body:JSON.stringify(Object.assign({type}, extra || {}))});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok){ toast(j.error || 'Ошибка.'); return null; }
+  return j;
+}
+async function loadUsers(){ const j = await act('adminUsers'); if (j){ users = j.users.filter(u => !u.admin).sort((a, b) => b.createdAt - a.createdAt); } }
+async function loadRooms(){ const j = await act('adminRooms'); if (j) roomsList = j.rooms; }
+
+function loginView(msg){
+  app.innerHTML = `<form class="login" id="f"><img src="logo.webp" alt="Belka" style="height:90px;align-self:center">
+    <h1 style="font-size:18px;margin:0;text-align:center">Панель администратора</h1>
+    <p class="note" style="text-align:center;margin:0">Вход только для администратора</p>
+    <input id="l" autocomplete="username" placeholder="Логин" required>
+    <input id="p" type="password" autocomplete="current-password" placeholder="Пароль" required>
+    <div class="err" id="e">${esc(msg || '')}</div>
+    <button class="pri" type="submit">Войти</button></form>`;
+  document.getElementById('f').addEventListener('submit', async e => {
+    e.preventDefault();
+    const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({login:document.getElementById('l').value, password:document.getElementById('p').value})});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return document.getElementById('e').textContent = j.error || 'Не получилось войти.';
+    if (!j.me || !j.me.admin) return document.getElementById('e').textContent = 'Этот аккаунт не администратор.';
+    token = j.token; try { localStorage.setItem('belka_stats_token', token); } catch(e2){}
+    start();
+  });
+}
+async function load(){
+  try {
+    const r = await fetch('/api/stats', {headers:{Authorization:'Bearer ' + token}});
+    if (r.status === 401 || r.status === 403){ stop(); token = null; try { localStorage.removeItem('belka_stats_token'); } catch(e){} return loginView(r.status === 403 ? 'Этот аккаунт не администратор.' : 'Войдите снова.'); }
+    data = await r.json(); lastOk = Date.now();
+    if (tab === 'players' && !busy()) await loadUsers();
+    if (tab === 'rooms') await loadRooms();
+    if (!busy()) render();
+  } catch(e){ const u = document.getElementById('upd'); if (u){ u.classList.add('err'); u.lastChild.textContent = 'нет связи с сервером'; } }
+}
+// не перерисовываем, пока админ что-то печатает
+const busy = () => { const a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA') && a.id !== 'q'; };
+function start(){ stop(); load(); timer = setInterval(load, 5000); }
+function stop(){ clearInterval(timer); }
+
+const time = t => new Date(t).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+const date = t => new Date(t).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+
+function chart(h){
+  if (!h || h.length < 2) return '<p class="note">График появится через пару минут работы сервера: онлайн записывается раз в минуту.</p>';
+  const W = 900, H = 180, pl = 30, pr = 10, pt = 10, pb = 22;
+  const t0 = h[0][0], t1 = h[h.length - 1][0];
+  const max = Math.max(1, ...h.map(p => p[1]));
+  const nice = max <= 5 ? 5 : Math.ceil(max / 5) * 5;
+  const x = t => pl + (t - t0) / Math.max(1, t1 - t0) * (W - pl - pr);
+  const y = v => pt + (1 - v / nice) * (H - pt - pb);
+  const line = h.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ' ' + y(p[1]).toFixed(1)).join(' ');
+  const area = line + ` L${x(t1).toFixed(1)} ${y(0)} L${x(t0).toFixed(1)} ${y(0)} Z`;
+  const ticks = [0, nice / 2, nice].map(v => `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(236,230,214,.08)"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#9fb8b0">${v}</text>`).join('');
+  const xt = [t0, (t0 + t1) / 2, t1].map((t, i) => `<text x="${x(t)}" y="${H - 5}" text-anchor="${['start','middle','end'][i]}" font-size="11" fill="#9fb8b0">${time(t)}</text>`).join('');
+  const last = h[h.length - 1];
+  return `<div class="chart" id="ch"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Онлайн за последние часы">
+    ${ticks}${xt}
+    <path d="${area}" fill="rgba(217,168,78,.14)"/>
+    <path d="${line}" fill="none" stroke="#d9a84e" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    <circle cx="${x(last[0])}" cy="${y(last[1])}" r="4" fill="#d9a84e" stroke="#12332f" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    <line id="cx" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="rgba(236,230,214,.35)" stroke-dasharray="3 3" visibility="hidden" vector-effect="non-scaling-stroke"/>
+    </svg><div class="tip" id="tip" hidden></div></div>`;
+}
+function bindChart(h){
+  const ch = document.getElementById('ch'); if (!ch) return;
+  const svg = ch.querySelector('svg'), tip = document.getElementById('tip'), cx = document.getElementById('cx');
+  const W = 900, pl = 30, pr = 10, t0 = h[0][0], t1 = h[h.length - 1][0];
+  svg.addEventListener('pointermove', e => {
+    const r = svg.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width * W;
+    const t = t0 + (fx - pl) / (W - pl - pr) * (t1 - t0);
+    let best = h[0]; for (const p of h) if (Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p;
+    const px = pl + (best[0] - t0) / Math.max(1, t1 - t0) * (W - pl - pr);
+    cx.setAttribute('x1', px); cx.setAttribute('x2', px); cx.setAttribute('visibility', 'visible');
+    tip.hidden = false; tip.style.left = (px / W * r.width) + 'px'; tip.style.top = '20px';
+    tip.innerHTML = `<b>${best[1]}</b> онлайн · ${time(best[0])}`;
+  });
+  svg.addEventListener('pointerleave', () => { tip.hidden = true; cx.setAttribute('visibility', 'hidden'); });
+}
+
+function statsHTML(d){
+  return `<section class="hero">
+      <div class="tile"><span class="l">Зарегистрировано игроков</span><span class="v">${d.registered}</span><span class="s">за сутки <b>+${d.newToday}</b> · за неделю <b>+${d.newWeek}</b></span></div>
+      <div class="tile on"><span class="l">Сейчас онлайн</span><span class="v">${d.online}</span><span class="s">в лобби <b>${d.inLobby}</b> · ждут за столами <b>${d.atTables}</b></span></div>
+      <div class="tile"><span class="l">Играют прямо сейчас</span><span class="v">${d.inGame}</span><span class="s">игроков в идущих партиях</span></div>
+    </section>
+    <section class="grid">
+      <div class="tile"><span class="l">Идёт партий</span><span class="v">${d.tablesPlaying}</span></div>
+      <div class="tile"><span class="l">Столов собирается</span><span class="v">${d.tablesWaiting}</span></div>
+      <div class="tile"><span class="l">На тренировке</span><span class="v">${d.training}</span></div>
+      <div class="tile"><span class="l">В бане</span><span class="v">${d.banned}</span></div>
+    </section>
+    <section class="panel"><h2>Онлайн за последние 24 часа</h2>${chart(d.history)}</section>
+    <section class="panel"><h2>Новые игроки</h2>
+      ${d.recent.length ? `<table><thead><tr><th>Логин</th><th>Уровень</th><th>Когда</th></tr></thead><tbody>${d.recent.map(u => `<tr><td>${esc(u.login)}</td><td class="n">${u.level}</td><td class="n">${date(u.at)}</td></tr>`).join('')}</tbody></table>` : '<p class="note">Пока никто не зарегистрировался.</p>'}
+      <p class="note">PRO: ${d.pro} · с короной: ${d.crown}</p></section>`;
+}
+function playersHTML(){
+  const f = users.filter(u => !q || u.login.toLowerCase().includes(q.toLowerCase()));
+  return `<section class="panel"><div class="tools"><input id="q" placeholder="Поиск по логину" value="${esc(q)}" autocomplete="off"><span class="note">Всего: ${users.length}</span></div>
+    <p class="note" style="margin-top:0">Пароли хранятся только в зашифрованном виде — их не видит никто, включая администратора. Забыл пароль — задайте новый.</p>
+    <div class="ulist">${f.map(u => `<div class="urow">
+      <div class="nm"><b>${esc(u.login)}</b><small>с ${date(u.createdAt)} · партий ${u.games || 0} · побед ${u.wins || 0}</small></div>
+      <div class="n">ур. ${u.level}</div>
+      <div>${u.banUntil ? `<span class="badge">бан до ${time(u.banUntil)}</span>` : u.complaints ? `<span class="badge">жалоб ${u.complaints}</span>` : '<span class="badge ok">ок</span>'}</div>
+      <div class="acts">
+        <input type="number" min="0" value="${u.points}" data-pts="${u.id}" aria-label="Очки ${esc(u.login)}"><button data-save="${u.id}">Очки</button>
+        ${u.banUntil || u.complaints ? `<button data-unban="${u.id}">Снять бан/жалобы</button>` : `<button data-ban="${u.id}">Бан 1 ч</button>`}
+        <button data-pw="${u.id}">Новый пароль</button>
+        <button class="danger" data-del="${u.id}">Удалить</button>
+      </div></div>`).join('') || '<p class="note">Никого не нашли.</p>'}</div></section>`;
+}
+function roomsHTML(){
+  const ph = {waiting:'собирается', playing:'идёт партия', dealEnd:'между раздачами', over:'партия окончена'};
+  return `<section class="panel"><h2>Столы</h2>${roomsList.length ? `<table><thead><tr><th>Стол</th><th>Игроки</th><th>Состояние</th><th></th></tr></thead><tbody>${roomsList.map(r => `<tr>
+    <td>${esc(r.name)}${r.private && !r.training ? ` <span class="badge">код ${esc(r.code)}</span>` : ''}</td>
+    <td>${r.seats.map(s => esc(s || '—')).join(', ')}</td>
+    <td class="n">${ph[r.phase] || r.phase}${r.phase !== 'waiting' ? ` · ${r.eyes[0]}:${r.eyes[1]}` : ''}</td>
+    <td><button class="danger" data-close="${r.id}">Закрыть</button></td></tr>`).join('')}</tbody></table>` : '<p class="note">Открытых столов нет.</p>'}</section>`;
+}
+function announceHTML(){
+  return `<section class="panel"><h2>Объявление всем игрокам онлайн</h2>
+    <form id="ann"><textarea id="annt" maxlength="300" placeholder="Например: в 23:00 перезапуск сервера на 2 минуты"></textarea>
+    <div class="tools" style="margin-top:8px"><button class="pri" type="submit">Отправить</button><span class="note">Сообщение всплывёт у всех, кто сейчас в игре.</span></div></form></section>`;
+}
+function render(){
+  const d = data;
+  const body = tab === 'players' ? playersHTML() : tab === 'rooms' ? roomsHTML() : tab === 'announce' ? announceHTML() : statsHTML(d);
+  app.innerHTML = `<header><img src="logo-row.webp" alt="Belka"><h1>Админ</h1><span class="sp"></span>
+      <span class="upd" id="upd"><i></i>обновлено в ${new Date(lastOk).toLocaleTimeString('ru-RU')}</span>
+      <button id="out">Выйти</button></header>
+    <nav class="tabs">${[['stats','Статистика'],['players','Игроки'],['rooms','Столы'],['announce','Объявление']].map(([k, l]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</nav>
+    ${body}`;
+  document.getElementById('out').onclick = () => { stop(); fetch('/api/logout', {method:'POST', headers:{Authorization:'Bearer ' + token}}); token = null; try { localStorage.removeItem('belka_stats_token'); } catch(e){} loginView(); };
+  app.querySelectorAll('[data-tab]').forEach(b => b.onclick = async () => { tab = b.dataset.tab; if (tab === 'players') await loadUsers(); if (tab === 'rooms') await loadRooms(); render(); });
+  if (tab === 'stats') bindChart(d.history);
+  const qi = document.getElementById('q');
+  if (qi){ qi.oninput = () => { q = qi.value; const pos = qi.selectionStart; render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(pos, pos); }; }
+  const reload = async m => { if (m) toast(m); await loadUsers(); render(); };
+  app.querySelectorAll('[data-save]').forEach(b => b.onclick = async () => { const v = app.querySelector(`[data-pts="${b.dataset.save}"]`).value; if (await act('adminSetPoints', {uid:b.dataset.save, points:+v})) reload('Очки сохранены.'); });
+  app.querySelectorAll('[data-ban]').forEach(b => b.onclick = async () => { if (!b.dataset.armed){ b.dataset.armed = 1; b.textContent = 'Точно?'; return; } if (await act('adminBan', {uid:b.dataset.ban, minutes:60})) reload('Игрок заблокирован на час.'); });
+  app.querySelectorAll('[data-unban]').forEach(b => b.onclick = async () => { if (await act('adminUnban', {uid:b.dataset.unban})) reload('Бан и жалобы сняты.'); });
+  app.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { if (!b.dataset.armed){ b.dataset.armed = 1; b.textContent = 'Точно удалить?'; return; } if (await act('adminDeleteUser', {uid:b.dataset.del})) reload('Игрок удалён.'); });
+  app.querySelectorAll('[data-pw]').forEach(b => b.onclick = () => {
+    const row = b.closest('.urow'); if (row.querySelector('form')) return;
+    row.insertAdjacentHTML('beforeend', `<form class="tools" style="grid-column:1/-1;margin:6px 0 0"><input type="text" minlength="6" placeholder="новый пароль (от 6 символов)" required><button class="pri">Задать</button></form>`);
+    const fm = row.querySelector('form'); fm.querySelector('input').focus();
+    fm.onsubmit = async e => { e.preventDefault(); if (await act('adminResetPw', {uid:b.dataset.pw, password:fm.querySelector('input').value})){ fm.remove(); toast('Пароль изменён. Сообщите его игроку.'); } };
+  });
+  app.querySelectorAll('[data-close]').forEach(b => b.onclick = async () => { if (!b.dataset.armed){ b.dataset.armed = 1; b.textContent = 'Точно?'; return; } if (await act('adminCloseRoom', {id:b.dataset.close})){ toast('Стол закрыт.'); await loadRooms(); render(); } });
+  const ann = document.getElementById('ann');
+  if (ann) ann.onsubmit = async e => { e.preventDefault(); const t = document.getElementById('annt').value; const j = await act('adminAnnounce', {text:t}); if (j){ toast(`Отправлено игрокам: ${j.sent}.`); document.getElementById('annt').value = ''; } };
+}
+
+token ? start() : loginView();
+})();
+</script>
+</body>
+</html>
